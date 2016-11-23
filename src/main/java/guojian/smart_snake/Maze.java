@@ -1,10 +1,5 @@
 package guojian.smart_snake;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,45 +18,41 @@ import java.util.Random;
  * @email 1181819395@qq.com
  */
 public class Maze implements Serializable, Cloneable {
-	private static final long serialVersionUID = -4768606043555585626L;
 	public static final int COLSIZE = 10;
 	public static final int ROWSIZE = 10;
+	private static final long serialVersionUID = -4768606043555585626L;
 
-	private Apple apple;// 苹果
+	private Point apple;// 苹果
 	private Point[][] array;//
 	private Snake snake;
 
 	public Maze() {
 		array = new Point[ROWSIZE][COLSIZE];
-		// 初始化二维数组。
+	}
+
+	public Object clone() throws CloneNotSupportedException {
+		/*
+		 * try { ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		 * ObjectOutputStream oos = new ObjectOutputStream(bos);
+		 * oos.writeObject(this); // 反序列化 ByteArrayInputStream bis = new
+		 * ByteArrayInputStream(bos.toByteArray()); ObjectInputStream ois = new
+		 * ObjectInputStream(bis); return ois.readObject(); } catch
+		 * (ClassNotFoundException e) { e.printStackTrace(); } catch
+		 * (IOException e) { e.printStackTrace(); }
+		 */
+		Maze clone = new Maze();
+		clone.apple = (Point) this.apple.clone();
+		clone.snake = (Snake) this.snake.clone();
 		for (int row = 0; row < ROWSIZE; row++) {
 			for (int col = 0; col < COLSIZE; col++) {
-				array[row][col] = new Cell(row, col);
+				clone.array[row][col] = (Point) this.array[row][col].clone();
 			}
 		}
+
+		return clone;
 	}
 
-	public Object clone() {
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(bos);
-
-				oos.writeObject(this);
-
-				// 反序列化
-				ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-				ObjectInputStream ois = new ObjectInputStream(bis);
-
-				return ois.readObject();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return null;
-	}
-
-	public Apple getApple() {
+	public Point getApple() {
 		return apple;
 	}
 
@@ -81,7 +72,7 @@ public class Maze implements Serializable, Cloneable {
 		return snake.getHead();
 	}
 
-	public Tail getSnakeTail() {
+	public Point getSnakeTail() {
 		return snake.getTail();
 	}
 
@@ -89,25 +80,35 @@ public class Maze implements Serializable, Cloneable {
 	 * 初始化迷宫中的蛇
 	 */
 	public void initMazeSnake() {
-		Head head = new Head((int) (ROWSIZE / 2), (int) (COLSIZE / 2));
-		Body body = new Body(head.row + 1, head.col);
-		Tail tail = new Tail(body.row + 1, body.col);
+		Point head = new Point((int) (ROWSIZE / 2), (int) (COLSIZE / 2), Type.Head);
+		Point body = new Point(head.row + 1, head.col, Type.Body);
+		Point tail = new Point(body.row + 1, body.col, Type.Tail);
 		snake = new Snake();
-		snake.addHead(head);
-		snake.addBody(body);
-		snake.addTail(tail);
+		snake.add(tail);
+		snake.add(body);
+		snake.add(head);
 		snakeIntoMaze();
 	}
 
+	/**
+	 * 初始化墙
+	 */
 	public void initWalls() {
+		// 初始化二维数组。
+		for (int row = 0; row < ROWSIZE; row++) {
+			for (int col = 0; col < COLSIZE; col++) {
+				array[row][col] = new Point(row, col, Type.Cell);
+			}
+		}
+
 		for (int col = 0; col < Maze.COLSIZE; col++) {
-			setPoint(new Wall(0, col));
-			setPoint(new Wall(Maze.ROWSIZE - 1, col));
+			setPoint(new Point(0, col, Type.Wall));
+			setPoint(new Point(Maze.ROWSIZE - 1, col, Type.Wall));
 		}
 
 		for (int row = 1; row < Maze.ROWSIZE - 1; row++) {
-			setPoint(new Wall(row, 0));
-			setPoint(new Wall(row, Maze.COLSIZE - 1));
+			setPoint(new Point(row, 0, Type.Wall));
+			setPoint(new Point(row, Maze.COLSIZE - 1, Type.Wall));
 		}
 	}
 
@@ -115,11 +116,10 @@ public class Maze implements Serializable, Cloneable {
 	 * 清理迷宫中的蛇
 	 */
 	private void mazeClearSnake() {
-		setPoint(new Cell(snake.getHead().row, snake.getHead().col));
-		for (Point p : snake.getBodys()) {
-			setPoint(new Cell(p.row, p.col));
+		setPoint(new Point(snake.getHead().row, snake.getHead().col, Type.Cell));
+		for (Point p : snake.getList()) {
+			setPoint(new Point(p.row, p.col, Type.Cell));
 		}
-		setPoint(new Cell(snake.getTail().row, snake.getTail().col));
 	}
 
 	/**
@@ -132,13 +132,13 @@ public class Maze implements Serializable, Cloneable {
 		for (int row = 0; row < Maze.ROWSIZE; row++) {
 			for (int col = 0; col < Maze.COLSIZE; col++) {
 				Point point = array[row][col];
-				if (point.getValue() == Cell.value) {
+				if (point.getType() == Type.Cell) {
 					list.add(point);
 				}
 			}
 		}
 		Point point = list.get(new Random().nextInt(list.size()));
-		apple = new Apple(point.row, point.col);
+		apple = new Point(point.row, point.col, Type.Apple);
 		setPoint(apple);
 	}
 
@@ -150,26 +150,24 @@ public class Maze implements Serializable, Cloneable {
 	 * 将蛇画到迷宫中
 	 */
 	private void snakeIntoMaze() {
-		setPoint(snake.getHead());
-		for (Point p : snake.getBodys()) {
+		for (Point p : snake.getList()) {
 			setPoint(p);
 		}
-		setPoint(snake.getTail());
 	}
 
 	public Game snakeMove(Point point) {
 		if (point == null) {
 			return Game.over;
 		}
-		int value = point.getValue();
-		if (value == Body.value || value == Tail.value || value == Wall.value) {
+		Type type = point.getType();
+		if (type == Type.Head || type == Type.Body || type == Type.Tail) {
 			return Game.over;
-		} else if (value == Apple.value) {
+		} else if (type == Type.Apple) {
 			mazeClearSnake();
 			snake.eatApple(point);
 			snakeIntoMaze();
 			return Game.eatApple;
-		} else if (value == Cell.value) {
+		} else if (type == Type.Cell) {
 			mazeClearSnake();
 			snake.move(point);
 			snakeIntoMaze();

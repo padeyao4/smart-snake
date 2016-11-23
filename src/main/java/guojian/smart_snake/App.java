@@ -47,11 +47,15 @@ import javafx.util.Duration;
 public class App extends Application {
 	private static final int WIDTH = 500;// 游戏区域画面宽度
 	private static final int HEIGHT = 500;// 游戏区域画面高度
-	private static final int OFFSET = WIDTH / Maze.COLSIZE;
+
+	private static final int FITWIDTH = WIDTH / Maze.COLSIZE;// 游戏区域，每个小方格的宽度
+	private static final int FITHEIGHT = HEIGHT / Maze.ROWSIZE;// 每个小方块的长度
+
+	private static final int OFFSET = 20;
 	private static final int frame_width = WIDTH + 2 * OFFSET;// 画面宽度
 	private static final int frame_height = HEIGHT + 2 * OFFSET;// 画面高度
 
-	private static int speed = 500;
+	private static int speed = 200;
 
 	private GraphicsContext pen;// 画笔
 	private Scene scene;// 场景
@@ -124,7 +128,8 @@ public class App extends Application {
 	private void action(Timeline timeLine) {
 		if (isArtificial) {
 			try {
-				computerSnakeRun();
+				/* computerSnakeRun(); */
+				smartSnakeRun();
 			} catch (Exception e) {
 				e.printStackTrace();
 				timeLine.pause();
@@ -151,90 +156,108 @@ public class App extends Application {
 		saveImageLocal();
 	}
 
-	
+	private void smartSnakeRun() throws CloneNotSupportedException, InterruptedException {
+		Path shortPath = BFS.searchShortPath(maze.getSnakeHead(), maze.getApple(), maze.getArray());
+		if (shortPath.isEmpty()) {// 找不到苹果
+			// 走离蛇身的最远距离
+			Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
+			if (longPath.isEmpty()) {// 路径为空
+				System.out.println("Game over");
+				Thread.sleep(100000000);
+			} else {
+				nextPoint = longPath.getNextPoint();
+			}
+		} else {// 找到苹果
+			// 试探走一步
+			Maze cloneMaze = (Maze) maze.clone();
+			cloneMaze.snakeMove(shortPath.getNextPoint());
+			// 找尾巴。找的到表示安全
+			Path clonePath = BFS.searchShortPath(cloneMaze.getSnake().getHead(), cloneMaze.getSnake().getTail(),
+					cloneMaze.getArray());
+			if (clonePath.size() > 2) {// 试探走一步后，蛇头离蛇尾距离大于2，安全。
+				nextPoint = shortPath.getNextPoint();
+			} else {// 蛇头紧挨蛇尾
+					// 走离蛇身的最远距离
+				Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
+				if (longPath.isEmpty()) {// 路径为空
+					System.out.println("蛇头紧挨蛇尾,最远路径为空");
+					nextPoint = shortPath.getNextPoint();
+				} else {// 走最远距离
+					System.out.println("蛇头紧挨蛇尾,走最远路径");
+					nextPoint = longPath.getNextPoint();
+				}
+			}
+		}
+	}
+
 	private String imageDir;
+
 	/**
-	 * 保存到本地
+	 * 将游戏执行图片保存到本地
 	 */
 	private void saveImageLocal() {
-		String snakedirStr = System.getProperty("user.home")+File.separatorChar+"snakeImage";
-		File snakedir =  new File(snakedirStr);
-		if(!snakedir.exists()){
+		String snakedirStr = System.getProperty("user.home") + File.separatorChar + "snakeImage";
+		File snakedir = new File(snakedirStr);
+		if (!snakedir.exists()) {
 			snakedir.mkdirs();
 		}
-		if(imageDir==null){
-			imageDir=System.currentTimeMillis()+"";
-			new File(snakedirStr+File.separatorChar+imageDir).mkdir();
+		if (imageDir == null) {
+			imageDir = System.currentTimeMillis() + "";
+			new File(snakedirStr + File.separatorChar + imageDir).mkdir();
 		}
-		
+
 		WritableImage image = cvs.snapshot(new SnapshotParameters(), null);
 		try {
-			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", new File(snakedirStr+File.separatorChar+imageDir+File.separatorChar+System.currentTimeMillis()+".png"));
+			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", new File(snakedirStr + File.separatorChar
+					+ imageDir + File.separatorChar + System.currentTimeMillis() + ".png"));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 	}
-
 
 	/**
 	 * 自动执行
 	 * 
 	 * @throws Exception
 	 */
-	private void computerSnakeRun() throws Exception {
-		Path path = BFS.findAppleShortPath(maze.getSnakeHead(), maze.getApple(), maze.getArray());
-
-		if (path.hasPath()) {// 找到苹果
-			Maze cloneMaze = (Maze) maze.clone();// 复制Maze
-			cloneMaze.snakeMove(path.getNextPoint());
-
-			Path cpt = BFS.findTailShortPath(cloneMaze.getSnakeHead(), cloneMaze.getSnakeTail(), cloneMaze.getArray());
-			if (cpt.hasPath()) {// 蛇向苹果走一步后，可以找到蛇尾
-				System.out.println("//蛇向苹果走一步后，可以找到蛇尾");
-				nextPoint = path.getNextPoint();
-			} else {// 蛇向苹果走一步后，不能找到蛇尾
-				Path tailPath = BFS.findTailShortPath(maze.getSnakeHead(), maze.getSnakeTail(), maze.getArray());
-				if (tailPath.hasPath()) {// 蛇找的到苹果，也找的到尾巴。如果蛇向苹果走一步就找不到尾巴
-					// 走蛇尾的最远距离
-					Path farPath = BFS.findFarTailPath(maze.getSnakeHead(), maze.getSnakeTail(), maze.getArray());
-					if (farPath.getSize() == 2) {// 蛇走蛇尾的最长距离，走一步就吃到蛇尾
-						System.out.println("蛇走蛇尾的最长距离，走一步就吃到蛇尾,蛇走蛇身的最长距离");
-						// 蛇走蛇身的最长距离
-						Path farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(), maze.getSnake().getBodys(),
-								maze.getArray());
-						nextPoint = farBodyPath.getNextPoint();
-					} else {// 蛇走蛇尾的最远距离
-						nextPoint = farPath.getNextPoint();
-					}
-				} else {// 真蛇找不到蛇尾 找的到苹果
-						// 走离蛇头最远的蛇身的最远距离
-					System.out.println("//真蛇找不到蛇尾 找的到苹果// 走离蛇头最远的蛇身的最远距离");
-					Path farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(), maze.getSnake().getBodys(),
-							maze.getArray());
-					nextPoint = farBodyPath.getNextPoint();
-				}
-			}
-		} else {// 找不到苹果
-			Path tailPath = BFS.findTailShortPath(maze.getSnakeHead(), maze.getSnakeTail(), maze.getArray());
-			if (tailPath.hasPath()) {// 找不到苹果，找的到蛇尾
-				// 离蛇尾的最远距离
-				Path farPath = BFS.findFarTailPath(maze.getSnakeHead(), maze.getSnakeTail(), maze.getArray());
-				if (farPath.getSize() == 2) {// 找不到苹果，蛇头走蛇尾最远距离走一步咬到蛇尾
-					// 走离蛇身的最远距离
-					Path farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(), maze.getSnake().getBodys(),
-							maze.getArray());
-					nextPoint = farBodyPath.getNextPoint();
-				} else {// 找不到苹果，蛇头走蛇尾最远距离，且咬不到蛇尾
-					nextPoint = farPath.getNextPoint();
-				}
-			} else {// 找不到苹果，找不到蛇尾
-				// 走离蛇头最远的蛇身的最远距离
-				Path farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(), maze.getSnake().getBodys(),
-						maze.getArray());
-				nextPoint = farBodyPath.getNextPoint();
-			}
-		}
-	}
+	/*
+	 * private void computerSnakeRun() throws Exception { Path path =
+	 * BFS.findAppleShortPath(maze.getSnakeHead(), maze.getApple(),
+	 * maze.getArray());
+	 * 
+	 * if (path.hasPath()) {// 找到苹果 Maze cloneMaze = (Maze) maze.clone();//
+	 * 复制Maze cloneMaze.snakeMove(path.getNextPoint());
+	 * 
+	 * Path cpt = BFS.findTailShortPath(cloneMaze.getSnakeHead(),
+	 * cloneMaze.getSnakeTail(), cloneMaze.getArray()); if (cpt.hasPath()) {//
+	 * 蛇向苹果走一步后，可以找到蛇尾 System.out.println("//蛇向苹果走一步后，可以找到蛇尾"); nextPoint =
+	 * path.getNextPoint(); } else {// 蛇向苹果走一步后，不能找到蛇尾 Path tailPath =
+	 * BFS.findTailShortPath(maze.getSnakeHead(), maze.getSnakeTail(),
+	 * maze.getArray()); if (tailPath.hasPath()) {//
+	 * 蛇找的到苹果，也找的到尾巴。如果蛇向苹果走一步就找不到尾巴 // 走蛇尾的最远距离 Path farPath =
+	 * BFS.findFarTailPath(maze.getSnakeHead(), maze.getSnakeTail(),
+	 * maze.getArray()); if (farPath.getSize() == 2) {// 蛇走蛇尾的最长距离，走一步就吃到蛇尾
+	 * System.out.println("蛇走蛇尾的最长距离，走一步就吃到蛇尾,蛇走蛇身的最长距离"); // 蛇走蛇身的最长距离 Path
+	 * farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(),
+	 * maze.getSnake().getBodys(), maze.getArray()); nextPoint =
+	 * farBodyPath.getNextPoint(); } else {// 蛇走蛇尾的最远距离 nextPoint =
+	 * farPath.getNextPoint(); } } else {// 真蛇找不到蛇尾 找的到苹果 // 走离蛇头最远的蛇身的最远距离
+	 * System.out.println("//真蛇找不到蛇尾 找的到苹果// 走离蛇头最远的蛇身的最远距离"); Path farBodyPath
+	 * = BFS.findFarBodyPath(maze.getSnakeHead(), maze.getSnake().getBodys(),
+	 * maze.getArray()); nextPoint = farBodyPath.getNextPoint(); } } } else {//
+	 * 找不到苹果 Path tailPath = BFS.findTailShortPath(maze.getSnakeHead(),
+	 * maze.getSnakeTail(), maze.getArray()); if (tailPath.hasPath()) {//
+	 * 找不到苹果，找的到蛇尾 // 离蛇尾的最远距离 Path farPath =
+	 * BFS.findFarTailPath(maze.getSnakeHead(), maze.getSnakeTail(),
+	 * maze.getArray()); if (farPath.getSize() == 2) {// 找不到苹果，蛇头走蛇尾最远距离走一步咬到蛇尾
+	 * // 走离蛇身的最远距离 Path farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(),
+	 * maze.getSnake().getBodys(), maze.getArray()); nextPoint =
+	 * farBodyPath.getNextPoint(); } else {// 找不到苹果，蛇头走蛇尾最远距离，且咬不到蛇尾 nextPoint =
+	 * farPath.getNextPoint(); } } else {// 找不到苹果，找不到蛇尾 // 走离蛇头最远的蛇身的最远距离 Path
+	 * farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(),
+	 * maze.getSnake().getBodys(), maze.getArray()); nextPoint =
+	 * farBodyPath.getNextPoint(); } } }
+	 */
 
 	private KeyCode currentKey;
 
@@ -246,16 +269,20 @@ public class App extends Application {
 	 */
 	private void controller(KeyCode key, Timeline timeLine) {
 		if (nextPoint == null && timeLine.getStatus() == Status.STOPPED) {
+
 			/*
 			 * if (key == KeyCode.UP || key == KeyCode.DOWN || key ==
 			 * KeyCode.LEFT || key == KeyCode.RIGHT) { timeLine.play(); }
 			 */
+
 			if (key == KeyCode.ENTER) {
 				if (isArtificial == false) {
 					timeLine.play();
 					isArtificial = true;
+					paintArray(maze);// 第一次显示
 				}
 			}
+
 		}
 
 		setPointAndCurrentDirectByKey(key);// 方向键控制下一个点
@@ -304,23 +331,22 @@ public class App extends Application {
 		pen.setFill(Color.WHITE);
 		pen.fillRect(0, 0, frame_width, frame_width);
 
-		int w = WIDTH / Maze.COLSIZE;
-		int h = HEIGHT / Maze.COLSIZE;
-
 		for (int row = 0; row < Maze.ROWSIZE; row++) {
 			for (int col = 0; col < Maze.COLSIZE; col++) {
 				Point point = m.getArrayPoint(row, col);
 				pen.setFill(point.getColor());
-				pen.fillRect(point.getSx() * w + OFFSET, point.getSy() * h + OFFSET, w - 1, h - 1);
+				pen.fillRect(point.getSx() * FITWIDTH + OFFSET, point.getSy() * FITHEIGHT + OFFSET, FITWIDTH - 1,
+						FITHEIGHT - 1);
 			}
 		}
 
-		List<Point> bodys = maze.getSnake().getBodys();
-		for (int i = 0; i < bodys.size() - 1; i++) {
+		List<Point> snakeList = maze.getSnake().getList();
+		for (int i = 0; i < snakeList.size() - 1; i++) {
 			pen.setFill(Color.DARKMAGENTA);
-			pen.strokeLine(bodys.get(i).sx * OFFSET + OFFSET / 2 + OFFSET,
-					bodys.get(i).sy * OFFSET + OFFSET / 2 + OFFSET, bodys.get(i + 1).sx * OFFSET + OFFSET / 2 + OFFSET,
-					bodys.get(i + 1).sy * OFFSET + OFFSET / 2 + OFFSET);
+			pen.strokeLine(snakeList.get(i).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
+					snakeList.get(i).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2,
+					snakeList.get(i + 1).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
+					snakeList.get(i + 1).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2);
 		}
 		for (int x = 0; x < Maze.COLSIZE; x++) {
 			// 设置字体大小
@@ -328,7 +354,7 @@ public class App extends Application {
 			// 设置文字颜色
 			pen.setFill(Color.BLACK);
 			// 画文字
-			pen.fillText(x + "", (x + 1) * OFFSET, frame_height);
+			pen.fillText(x + "", OFFSET + x * FITWIDTH, frame_height);
 		}
 		for (int y = 0; y < Maze.ROWSIZE; y++) {
 			// 设置字体大小
@@ -336,7 +362,7 @@ public class App extends Application {
 			// 设置文字颜色
 			pen.setFill(Color.BLACK);
 			// 画文字
-			pen.fillText(y + "", 0, frame_height - OFFSET * (y + 1));
+			pen.fillText(y + "", 0, frame_height - OFFSET - FITHEIGHT * y);
 		}
 
 	}
