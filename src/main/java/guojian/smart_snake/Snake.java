@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 蛇<br>
+ * @author guojian
+ * @date 2016年11月23日 下午11:41:30
+ * @email 1181819395@qq.com
+ */
 public class Snake implements Serializable,Cloneable{
 	private static final long serialVersionUID = 1211631935294087884L;
 	private List<Point> list = new ArrayList<>();//第一个元素为蛇尾

@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * <p>
- * Title:
+ * 利用广度优先算法寻找最短路径
  * </p>
  * 
  * @author guojian
@@ -52,6 +52,12 @@ public class BFS {
 		return list;
 	}
 
+	/**
+	 * 获取一个点周围4个点
+	 * @param array
+	 * @param p1
+	 * @return 返回4个点。顺序随机
+	 */
 	private static List<Point> get4Point(Point[][] array, Point p1) {
 		List<Point> sourceList = Arrays.asList(new Point[] { array[p1.row + 1][p1.col], array[p1.row - 1][p1.col],
 				array[p1.row][p1.col - 1], array[p1.row][p1.col + 1] });
@@ -60,18 +66,22 @@ public class BFS {
 		Collections.shuffle(list, new Random());//防止出现循环情况
 		return list;
 	}
+	
 	/**
-	 * 在二维数组中寻找两点间的最短距离
+	 * 
+	 *  在二维数组中寻找两点间的最短距离
 	 * <p>
 	 * 1.访问A点,将A点 标记为 访问的点(用一个集合 保存已经访问的点,Set s),判断A点是否是B点 <br>
 	 * 2.如果是B，跳出循环,返回路径。<br>
-	 * 3.如果不是 ,将 A周围4个点符合要求的点(不是墙，不是蛇身，不是访问的点)的点加入 队列(队列Queue q)。并标记 加入队列的点的
+	 * 3.如果不是 ,将 A周围4个点符合要求的点(不是墙，不是蛇，不是访问的点)加入 队列(队列Queue q)。并标记 加入队列的点的
 	 * 父节点为A。<br>
 	 * 
-	 * 5.取出队列q中的一个点。当这个点为A。循环 1235
+	 * 4.取出队列q中的一个点。当这个点为A。循环 1234
 	 * </p>
-	 * 
-	 * @return p1到p2的所有点,包含p1和p2。
+	 * @param p1 A
+	 * @param p2 B
+	 * @param mazeArray 二维数组
+	 * @return 返回最短路径
 	 */
 	public static Path searchShortPath(Point p1, Point p2, Point[][] mazeArray) {
 		Queue<Point> q = new LinkedList<>();// 没访问的点
@@ -113,9 +123,17 @@ public class BFS {
 		return new Path(null);
 	}
 
+	/**
+	 * <p>路径</p>
+	 * <p>list为搜索到的最短路径,包含起始点和结束点</p>
+	 * @author guojian
+	 * @date 2016年11月24日 上午12:18:36
+	 * @email 1181819395@qq.com
+	 */
 	static class Path {
 		List<Point> list;
-		Path(List<Point> list) {
+		
+		public Path(List<Point> list) {
 			if (list == null) {
 				this.list = new ArrayList<>();
 			} else {
@@ -123,12 +141,18 @@ public class BFS {
 			}
 		}
 
+		/**
+		 * @return 最短路径长度
+		 */
 		public int size() {
 			return list.size();
 		}
 
+		/**
+		 * @return 返回起始点的下一个点
+		 */
 		public Point getNextPoint() {
-			if(list.size()==0){
+			if(list.size()<2){
 				return null;
 			}else{
 				return list.get(1);
@@ -142,9 +166,18 @@ public class BFS {
 	}
 
 
-	public static Path searchLongPath(Point pa, Point pb, Point[][] pointArray) {
-		Point p1 = pa.clone();
-		Point p2 = pb.clone();
+	/**
+	 * 搜索a点到b点的最长路径。<br>
+	 * 找a点周围的4个点离b点最短距离。选出其中长度最长的路径。该路径的第一个点就是4个点中离b点最远的点。<br>
+	 * 以此类推，找该路径的第一个点的周围4个点，并找其最短路径.....
+	 * @param a
+	 * @param b
+	 * @param pointArray
+	 * @return 返回a点周围4个点离b点最短距离中 最长的路径
+	 */
+	public static Path searchLongPath(Point a, Point b, Point[][] pointArray) {
+		Point p1 = a.clone();
+		Point p2 = b.clone();
 		Point[][] array = pointArray.clone();
 		
 		List<Point> list = get4Point(array, p1);

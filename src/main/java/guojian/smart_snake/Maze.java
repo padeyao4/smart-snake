@@ -148,24 +148,24 @@ public class Maze implements Serializable, Cloneable {
 	}
 
 	
-	public Game snakeMove(Point point) {
+	public SnakeStatus snakeMove(Point point) {
 		if (point == null) {
-			return Game.over;
+			return SnakeStatus.die;
 		}
 		Type type = point.getType();
 		if (type == Type.Head || type == Type.Body || type == Type.Tail||type==Type.Wall) {
-			return Game.over;
+			return SnakeStatus.die;
 		} else if (type == Type.Apple) {
 			mazeClearSnake();
 			snake.eatApple(point);
 			snakeIntoMaze();
-			return Game.apple;
+			return SnakeStatus.eat;
 		} else if (type == Type.Cell) {
 			mazeClearSnake();
 			snake.move(point);
 			snakeIntoMaze();
-			return Game.move;
+			return SnakeStatus.move;
 		}
-		return Game.exception;
+		return null;
 	}
 }

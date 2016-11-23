@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 import javafx.scene.paint.Color;
 
+/**
+ * @author guojian
+ * @date 2016年11月23日 下午11:42:05
+ * @email 1181819395@qq.com
+ */
 public class Point implements Serializable,Cloneable{
 	private static final long serialVersionUID = -1089066798225347306L;
 	int col;// 数组 列
@@ -123,6 +128,7 @@ public class Point implements Serializable,Cloneable{
 			break;
 		}
 	}
+	
 	@Override
 	protected Point clone() {
 		Point point = new Point(this.row, this.col, this.type);

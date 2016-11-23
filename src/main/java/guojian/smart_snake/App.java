@@ -26,8 +26,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * <p>
- * <p>
  * javafx画图简单的用法：<br>
  * 舞台对象(primaryStage)需要添加一个场景对象(Scene)<br>
  * 场景对象需要添加画布对象(Canvas)<br>
@@ -52,15 +50,15 @@ public class App extends Application {
 	private static int FITWIDTH;// 游戏区域，每个小方格的宽度
 	private static int FITHEIGHT;// 每个小方块的长度
 
-	private static int OFFSET;
+	private static int OFFSET;//偏移量
 	private static int frame_width;// 画面宽度
 	private static int frame_height;// 画面高度
 
-	private static String imageDir;
-	private static String rootPath;
-	private static String saveImage;
+	private static String imageDir;// 图片文件夹名称
+	private static String rootPath;// java获取绝对路径的参数. eg System.getProperty(rootPath) , rootpath="user.home"
+	private static String saveImage;//是否开启保存图片 默认为false
 
-	private static int speed;
+	private static int speed;//速度
 
 	private GraphicsContext pen;// 画笔
 	private Scene scene;// 场景
@@ -68,7 +66,7 @@ public class App extends Application {
 	private Maze maze;// 蛇，墙，苹果构成的迷宫
 	private Point nextPoint;// 蛇一下步移动的点
 
-	private Canvas cvs;
+	private Canvas cvs;//画布
 
 	private static void initApp() {
 		try {
@@ -107,7 +105,7 @@ public class App extends Application {
 		// 初始化游戏
 		initGame();
 
-		// 设置定时，每隔800ms执行一次
+		// 设置定时，每过一段时间执行一次
 		Timeline timeLine = new Timeline();
 		timeLine.setCycleCount(Timeline.INDEFINITE);// 设置循环
 		timeLine.getKeyFrames().add(new KeyFrame(Duration.millis(speed), e -> {
@@ -138,14 +136,14 @@ public class App extends Application {
 	 * 初始化游戏
 	 */
 	private void initGame() {
-		maze = new Maze();
-		maze.initWalls();
-		maze.initMazeSnake();
-		maze.randomApple();
+		maze = new Maze();//迷宫
+		maze.initWalls();//生成迷宫的墙
+		maze.initMazeSnake();//在迷宫中间生成一条蛇
+		maze.randomApple();//在迷宫里随机生成一个苹果
 	}
 
-	private boolean isArtificial = false;
-	private Game status=Game.stoped;
+	private boolean isAuto = false;//默认不开启智能
+	private SnakeStatus status;//蛇当前的状态
 
 	/**
 	 * 游戏每隔间断时间后实行的动作
@@ -153,22 +151,24 @@ public class App extends Application {
 	 * @param timeLine
 	 */
 	private void action(Timeline timeLine) {
-		if (isArtificial) {
+		if (isAuto) {//智能运行
 			smartSnakeRun();
-		} else {
-			setPointByKey(currentKey);// 保持上一次方向运动
+		} else {//手动运行
+			setPointByKey(currentKey);//，保持上一次方向运动
 		}
+		
 
 		status = maze.snakeMove(nextPoint);
-		if (status == Game.apple) {
+		if (status == SnakeStatus.eat) {
 			maze.randomApple();
-		} else if (status == Game.over) {// 当游戏返回over时，结束游戏
+			paintArray(maze);
+		} else if (status == SnakeStatus.die) {// 当游戏返回over时，结束游戏
 			paintHelpInfo("GAME OVER", 80, 40);
 			timeLine.stop();
-			return;
+		}else if(status==SnakeStatus.move){
+			paintArray(maze);
 		}
 
-		paintArray(maze);
 
 		if (saveImage.trim().equals("true")) {
 			saveImageLocal();
@@ -182,7 +182,7 @@ public class App extends Application {
 			Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
 			if (longPath.isEmpty()) {// 路径为空
 				System.out.println("Game over");
-				nextPoint = null;
+				nextPoint = null;//nextPoint为空时游戏结束
 			} else {
 				nextPoint = longPath.getNextPoint();
 			}
@@ -215,7 +215,7 @@ public class App extends Application {
 		}
 	}
 
-	private String dir;
+	private String dir;//每次运行时，图片保存的文件夹名称。为游戏运行时，系统时间
 
 	/**
 	 * 将游戏执行图片保存到本地
@@ -242,7 +242,7 @@ public class App extends Application {
 		}
 	}
 
-	private KeyCode currentKey = KeyCode.DOWN;// 保存上一次按键的方向
+	private KeyCode currentKey;// 保存上一次按键的方向
 
 	/**
 	 * 监听按键，并执行对应的方法
@@ -251,23 +251,23 @@ public class App extends Application {
 	 * @param timeLine
 	 */
 	private void controller(KeyCode key, Timeline timeLine) {
+		
+		
+		
 		if (timeLine.getStatus() == Status.STOPPED) {
 			// 按方向键开始游戏
 			if (key == KeyCode.UP || key == KeyCode.DOWN || key == KeyCode.LEFT || key == KeyCode.RIGHT) {
 				timeLine.play();
-				if (key == KeyCode.DOWN) {
-					currentKey = KeyCode.UP;
-				} else {
-					currentKey = key;
-				}
+				currentKey=getSnakeDirection()[1];
+				currentKey=negativeIgnore(key);
 				paintArray(maze);// 第一次显示
 				return;
 			}
 
 			if (key == KeyCode.ENTER) {
-				if (isArtificial == false) {
+				if (isAuto == false) {
 					timeLine.play();
-					isArtificial = true;
+					isAuto = true;
 					paintArray(maze);// 第一次显示
 					return;
 				}
@@ -277,11 +277,11 @@ public class App extends Application {
 				timeLine.pause();
 				return;
 			} else if (key == KeyCode.ENTER) {
-				if (isArtificial == false) {
-					isArtificial = true;
+				if (isAuto == false) {
+					isAuto = true;
 					return;
 				} else {
-					isArtificial = false;
+					isAuto = false;
 					currentKey=getSnakeDirection()[1];
 					return;
 				}
@@ -292,14 +292,14 @@ public class App extends Application {
 				timeLine.play();
 				return;
 			} else if (key == KeyCode.ENTER) {
-				if (isArtificial == false) {
+				if (isAuto == false) {
 					timeLine.play();
-					isArtificial = true;
+					isAuto = true;
 					return;
 				}
 			}
 		}
-		setPointByKey(key);// 控制
+		setPointByKey(key);// 控制蛇移动的方向
 	}
 
 	private KeyCode negativeIgnore(KeyCode key) {
