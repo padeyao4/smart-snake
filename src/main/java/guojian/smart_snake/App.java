@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
 
 import guojian.smart_snake.BFS.*;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -44,29 +47,25 @@ import javafx.util.Duration;
  * @email 1181819395@qq.com
  */
 public class App extends Application {
-	private static int WIDTH;// 游戏区域画面宽度
-	private static int HEIGHT;// 游戏区域画面高度
-
-	private static int FITWIDTH;// 游戏区域，每个小方格的宽度
 	private static int FITHEIGHT;// 每个小方块的长度
+	private static int FITWIDTH;// 游戏区域，每个小方格的宽度
 
-	private static int OFFSET;//偏移量
-	private static int frame_width;// 画面宽度
 	private static int frame_height;// 画面高度
+	private static int frame_width;// 画面宽度
 
+	private static int HEIGHT;// 游戏区域画面高度
 	private static String imageDir;// 图片文件夹名称
-	private static String rootPath;// java获取绝对路径的参数. eg System.getProperty(rootPath) , rootpath="user.home"
-	private static String saveImage;//是否开启保存图片 默认为false
+	private static int OFFSET;// 偏移量
 
-	private static int speed;//速度
+	private static String rootPath;// java获取绝对路径的参数. eg
+									// System.getProperty(rootPath) ,
+									// rootpath="user.home"
+	private static String saveImage;// 是否开启保存图片 默认为false
+	private static int speed;// 速度
 
-	private GraphicsContext pen;// 画笔
-	private Scene scene;// 场景
-
-	private Maze maze;// 蛇，墙，苹果构成的迷宫
-	private Point nextPoint;// 蛇一下步移动的点
-
-	private Canvas cvs;//画布
+	private static int WIDTH;// 游戏区域画面宽度
+	private static String userDir;
+	private static String saveGameOverImage;
 
 	private static void initApp() {
 		try {
@@ -82,6 +81,8 @@ public class App extends Application {
 			speed = Integer.parseInt(bundle.getString("speed"));
 			rootPath = bundle.getString("rootPath");
 			saveImage = bundle.getString("saveImage");
+			userDir=bundle.getString("userDir");
+			saveGameOverImage=bundle.getString("saveGameOverImage");
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("config.properties填写错误");
@@ -90,60 +91,46 @@ public class App extends Application {
 
 	}
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		Group group = new Group();
-		cvs = new Canvas(frame_width, frame_height);
-		pen = cvs.getGraphicsContext2D();
-		group.getChildren().add(cvs);
-		scene = new Scene(group, frame_width, frame_height);
-		primaryStage.setScene(scene);// primaryStage添加
-										// scene,scene添加group，group添加canvas。canvas获取graphicsContext
-		primaryStage.setTitle("SmartSnake");
-		primaryStage.show();
+	public static void main(String[] args) {
+		initApp();
+		launch(args);// 启动程序
+	}
 
-		// 初始化游戏
-		initGame();
+	private KeyCode currentKey;// 保存上一次按键的方向
+	private Canvas cvs;// 画布
 
-		// 设置定时，每过一段时间执行一次
-		Timeline timeLine = new Timeline();
-		timeLine.setCycleCount(Timeline.INDEFINITE);// 设置循环
-		timeLine.getKeyFrames().add(new KeyFrame(Duration.millis(speed), e -> {
-			action(timeLine);
-		}));
+	private String dir;// 每次运行时，图片保存的文件夹名称。为游戏运行时，系统时间
 
-		// 开始帮助信息
-		paintHelpInfo("按方向键开始游戏,按enter开启智能", 0, 25);
-		// 设置按键监听
-		scene.setOnKeyPressed(e -> {
-			controller(e.getCode(), timeLine);
+	private BooleanProperty isAuto;// 默认不开启智能
+
+	private Maze maze;// 蛇，墙，苹果构成的迷宫
+
+	private Point nextPoint;// 蛇一下步移动的点
+
+	private GraphicsContext pen;// 画笔
+
+	private Scene scene;// 场景
+	private SnakeStatus status;// 蛇当前的状态
+	private GameStatus game;
+
+	void initParam() {
+		currentKey = null;
+		dir = null;
+		maze = null;
+		nextPoint = null;
+		isAuto = new SimpleBooleanProperty(false);
+		isAuto.addListener((v, o, n) -> {
+			showHelpInfo();
 		});
+		status = null;
+		game = GameStatus.wait;
 	}
 
-	private void paintHelpInfo(String msg, int offset, int fontSize) {
-		// 画背景
-		pen.setFill(Color.WHITE);
-		pen.fillRect(0, 0, frame_width, frame_width);
-		// 设置字体大小
-		pen.setFont(new Font(fontSize));
-		// 设置文字颜色
-		pen.setFill(Color.BLACK);
-		// 画文字
-		pen.fillText(msg, offset + OFFSET, HEIGHT / 2 + OFFSET);
+	enum GameStatus {
+		over, // 结束
+		running, // 运行中
+		wait// 等待中
 	}
-
-	/**
-	 * 初始化游戏
-	 */
-	private void initGame() {
-		maze = new Maze();//迷宫
-		maze.initWalls();//生成迷宫的墙
-		maze.initMazeSnake();//在迷宫中间生成一条蛇
-		maze.randomApple();//在迷宫里随机生成一个苹果
-	}
-
-	private boolean isAuto = false;//默认不开启智能
-	private SnakeStatus status;//蛇当前的状态
 
 	/**
 	 * 游戏每隔间断时间后实行的动作
@@ -151,27 +138,261 @@ public class App extends Application {
 	 * @param timeLine
 	 */
 	private void action(Timeline timeLine) {
-		if (isAuto) {//智能运行
+		if (isAuto.get()) {// 智能运行
 			smartSnakeRun();
-		} else {//手动运行
-			setPointByKey(currentKey);//，保持上一次方向运动
+		} else {// 手动运行
+			setPointByKey(currentKey);// ，保持上一次方向运动
 		}
-		
 
 		status = maze.snakeMove(nextPoint);
 		if (status == SnakeStatus.eat) {
 			maze.randomApple();
-			paintArray(maze);
-		} else if (status == SnakeStatus.die) {// 当游戏返回over时，结束游戏
-			paintHelpInfo("GAME OVER", 80, 40);
+			paintMzae();
+			game = GameStatus.running;
+		} else if (status == SnakeStatus.die) {// 游戏结束
 			timeLine.stop();
-		}else if(status==SnakeStatus.move){
-			paintArray(maze);
+			game = GameStatus.over;
+			saveGameOverImage();
+			showOverInfo();
+		} else if (status == SnakeStatus.move) {
+			paintMzae();
+			game = GameStatus.running;
 		}
-
 
 		if (saveImage.trim().equals("true")) {
 			saveImageLocal();
+		}
+	}
+
+	private String overPath;
+	private void saveGameOverImage() {
+		if(saveGameOverImage.trim().equals("true")){
+			File desktopDir = FileSystemView.getFileSystemView().getHomeDirectory();
+			String desktopPath = desktopDir.getAbsolutePath();
+			String deskdir = desktopPath+File.separatorChar+userDir;
+			File d = new File(deskdir);
+			if(!d.exists()){
+				d.mkdirs();
+			};
+			overPath=deskdir+File.separatorChar+System.currentTimeMillis()+".png";
+			saveImage(new File(overPath));
+		}
+	}
+
+	/**
+	 * 监听按键，并执行对应的方法
+	 * 
+	 * @param e
+	 * @param timeLine
+	 */
+	private void controller(KeyCode key, Timeline timeLine) {
+
+		if (key == KeyCode.ESCAPE) {
+			System.exit(0);
+			return;
+		}
+
+		if (timeLine.getStatus() == Status.STOPPED) {
+			if (game == GameStatus.wait) {// 游戏等待中
+				// 按空格键开始游戏
+				if (key == KeyCode.SPACE) {
+					timeLine.play();
+					game = GameStatus.running;
+					currentKey = getSnakeDirection()[1];
+					paintMzae();// 第一次显示
+					return;
+				} else if (key == KeyCode.ENTER) {
+					if (isAuto.get() == false) {
+						isAuto.set(true);
+						return;
+					} else {
+						isAuto.set(false);
+						currentKey = getSnakeDirection()[1];
+						return;
+					}
+				}
+			} else if (game == GameStatus.over) {
+				if (key == KeyCode.SPACE) {
+					initGame();// 重新开始游戏
+				}
+			}
+
+		} else if (timeLine.getStatus() == Status.RUNNING) {
+			if (key == KeyCode.SPACE) {
+				timeLine.pause();
+				showHelpInfo();
+				return;
+			}
+		} else if (timeLine.getStatus() == Status.PAUSED) {
+			if (key == KeyCode.SPACE) {
+				timeLine.play();
+				paintMzae();
+				return;
+			} else if (key == KeyCode.ENTER) {
+				if (isAuto.get() == false) {
+					isAuto.set(true);
+					return;
+				} else {
+					isAuto.set(false);
+					currentKey = getSnakeDirection()[1];
+					return;
+				}
+			}
+		}
+		setPointByKey(key);// 控制蛇移动的方向
+	}
+
+	/**
+	 * 
+	 * @return 第一个key 为 蛇运动的反方向，第二个key为蛇运动的正方向
+	 */
+	private KeyCode[] getSnakeDirection() {
+		KeyCode inverseKey = null;
+		KeyCode forwardKey = null;
+		Point p1 = maze.getSnakeHead();
+		List<Point> list = maze.getSnake().getList();
+		Point p2 = list.get(list.size() - 2);
+
+		if (p1.x > p2.x) {
+			inverseKey = KeyCode.LEFT;
+			forwardKey = KeyCode.RIGHT;
+		} else if (p1.x < p2.x) {
+			inverseKey = KeyCode.RIGHT;
+			forwardKey = KeyCode.LEFT;
+		} else if (p1.x == p2.x) {
+			if (p1.y > p2.y) {
+				inverseKey = KeyCode.DOWN;
+				forwardKey = KeyCode.UP;
+			} else if (p1.y < p2.y) {
+				inverseKey = KeyCode.UP;
+				forwardKey = KeyCode.DOWN;
+			}
+		}
+		return new KeyCode[] { inverseKey, forwardKey };
+	}
+
+	/**
+	 * 初始化游戏
+	 */
+	private void initMaze() {
+		maze = new Maze();// 迷宫
+		maze.initWalls();// 生成迷宫的墙
+		maze.initMazeSnake();// 在迷宫中间生成一条蛇
+		maze.randomApple();// 在迷宫里随机生成一个苹果
+	}
+
+	private KeyCode negativeIgnore(KeyCode key) {
+		KeyCode inverseKey = getSnakeDirection()[0];
+		if (key == inverseKey) {
+			return currentKey;
+		} else {
+			return key;
+		}
+	}
+
+	/**
+	 * 将数组画到画布
+	 * 
+	 * @param m
+	 */
+	private void paintMzae() {
+		// 画背景
+		pen.setFill(Color.WHITE);
+		pen.fillRect(0, 0, frame_width, frame_width);
+
+		for (int row = 0; row < Maze.ROWSIZE; row++) {
+			for (int col = 0; col < Maze.COLSIZE; col++) {
+				Point point = maze.getArrayPoint(row, col);
+				pen.setFill(point.getColor());
+				pen.fillRect(point.getSx() * FITWIDTH + OFFSET, point.getSy() * FITHEIGHT + OFFSET, FITWIDTH - 1,
+						FITHEIGHT - 1);
+			}
+		}
+
+		List<Point> snakeList = maze.getSnake().getList();
+		for (int i = 0; i < snakeList.size() - 1; i++) {
+			pen.setFill(Color.DARKMAGENTA);
+			// 画直线
+			pen.strokeLine(snakeList.get(i).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
+					snakeList.get(i).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2,
+					snakeList.get(i + 1).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
+					snakeList.get(i + 1).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2);
+		}
+		for (int x = 0; x < Maze.COLSIZE; x++) {
+			// 设置字体大小
+			pen.setFont(new Font(15));
+			// 设置文字颜色
+			pen.setFill(Color.BLACK);
+			// 画文字
+			pen.fillText(x + "", OFFSET + x * FITWIDTH + (OFFSET / 2), frame_height);
+		}
+		for (int y = 0; y < Maze.ROWSIZE; y++) {
+			// 设置字体大小
+			pen.setFont(new Font(15));
+			// 设置文字颜色
+			pen.setFill(Color.BLACK);
+			// 画文字
+			pen.fillText(y + "", 0, OFFSET + HEIGHT - FITHEIGHT * (y) - (OFFSET / 2));
+		}
+
+	}
+
+	/**
+	 * 将游戏执行图片保存到本地
+	 */
+	public void saveImageLocal() {
+		String snakedirStr = System.getProperty(rootPath) + File.separatorChar + imageDir;
+		File snakedir = new File(snakedirStr);
+
+		if (!snakedir.exists()) {
+			snakedir.mkdirs();
+		}
+
+		if (dir == null) {
+			dir = System.currentTimeMillis() + "";
+			new File(snakedirStr + File.separatorChar + dir).mkdir();
+		}
+
+		File savePath = new File(
+				snakedirStr + File.separatorChar + dir + File.separatorChar + System.currentTimeMillis() + ".png");
+
+		saveImage(savePath);
+	}
+
+	private void saveImage(File savePath) {
+		WritableImage image = cvs.snapshot(new SnapshotParameters(), null);
+		try {
+			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", savePath);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	/**
+	 * 根据keyCode设置下一个point和保存当前KeyCode
+	 * 
+	 * @param key
+	 */
+	private void setPointByKey(KeyCode key) {
+		switch (key) {
+		case UP:
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row - 1, maze.getSnakeHead().col);
+			currentKey = negativeIgnore(key);
+			break;
+		case DOWN:
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row + 1, maze.getSnakeHead().col);
+			currentKey = negativeIgnore(key);
+			break;
+		case LEFT:
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col - 1);
+			currentKey = negativeIgnore(key);
+			break;
+		case RIGHT:
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col + 1);
+			currentKey = negativeIgnore(key);
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -182,7 +403,7 @@ public class App extends Application {
 			Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
 			if (longPath.isEmpty()) {// 路径为空
 				System.out.println("Game over");
-				nextPoint = null;//nextPoint为空时游戏结束
+				nextPoint = null;// nextPoint为空时游戏结束
 			} else {
 				nextPoint = longPath.getNextPoint();
 			}
@@ -215,209 +436,83 @@ public class App extends Application {
 		}
 	}
 
-	private String dir;//每次运行时，图片保存的文件夹名称。为游戏运行时，系统时间
+	private Timeline timeLine = null;// 定时，动画
 
-	/**
-	 * 将游戏执行图片保存到本地
-	 */
-	public void saveImageLocal() {
-		String snakedirStr = System.getProperty(rootPath) + File.separatorChar + imageDir;
-		File snakedir = new File(snakedirStr);
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		Group group = new Group();
+		cvs = new Canvas(frame_width, frame_height);
+		pen = cvs.getGraphicsContext2D();
+		group.getChildren().add(cvs);
+		scene = new Scene(group, frame_width, frame_height);
+		primaryStage.setScene(scene);// primaryStage添加
+										// scene,scene添加group，group添加canvas。canvas获取graphicsContext
+		primaryStage.setTitle("SmartSnake");
+		primaryStage.show();
 
-		if (!snakedir.exists()) {
-			snakedir.mkdirs();
-		}
+		// 初始化游戏
+		initGame();
 
-		if (dir == null) {
-			dir = System.currentTimeMillis() + "";
-			new File(snakedirStr + File.separatorChar + dir).mkdir();
-		}
-
-		WritableImage image = cvs.snapshot(new SnapshotParameters(), null);
-		try {
-			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", new File(
-					snakedirStr + File.separatorChar + dir + File.separatorChar + System.currentTimeMillis() + ".png"));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
+		// 设置按键监听
+		scene.setOnKeyPressed(e -> {
+			controller(e.getCode(), timeLine);
+		});
 	}
 
-	private KeyCode currentKey;// 保存上一次按键的方向
-
-	/**
-	 * 监听按键，并执行对应的方法
-	 * 
-	 * @param e
-	 * @param timeLine
-	 */
-	private void controller(KeyCode key, Timeline timeLine) {
-		
-		
-		
-		if (timeLine.getStatus() == Status.STOPPED) {
-			// 按方向键开始游戏
-			if (key == KeyCode.UP || key == KeyCode.DOWN || key == KeyCode.LEFT || key == KeyCode.RIGHT) {
-				timeLine.play();
-				currentKey=getSnakeDirection()[1];
-				currentKey=negativeIgnore(key);
-				paintArray(maze);// 第一次显示
-				return;
-			}
-
-			if (key == KeyCode.ENTER) {
-				if (isAuto == false) {
-					timeLine.play();
-					isAuto = true;
-					paintArray(maze);// 第一次显示
-					return;
-				}
-			}
-		} else if (timeLine.getStatus() == Status.RUNNING) {
-			if (key == KeyCode.SPACE) {
-				timeLine.pause();
-				return;
-			} else if (key == KeyCode.ENTER) {
-				if (isAuto == false) {
-					isAuto = true;
-					return;
-				} else {
-					isAuto = false;
-					currentKey=getSnakeDirection()[1];
-					return;
-				}
-			}
-
-		} else if (timeLine.getStatus() == Status.PAUSED) {
-			if (key == KeyCode.SPACE) {
-				timeLine.play();
-				return;
-			} else if (key == KeyCode.ENTER) {
-				if (isAuto == false) {
-					timeLine.play();
-					isAuto = true;
-					return;
-				}
-			}
-		}
-		setPointByKey(key);// 控制蛇移动的方向
+	private void initGame() {
+		// 初始化参数
+		initParam();
+		// 初始化游戏
+		initMaze();
+		// 设置定时，每过一段时间执行一次
+		initTimeLine();
+		// 开始帮助信息
+		showHelpInfo();
 	}
 
-	private KeyCode negativeIgnore(KeyCode key) {
-		KeyCode inverseKey = getSnakeDirection()[0];
-		if (key == inverseKey) {
-			return currentKey;
-		} else {
-			return key;
-		}
-	}
-
-	/**
-	 * 
-	 * @return 第一个key 为 蛇运动的反方向，第二个key为蛇运动的正方向
-	 */
-	private KeyCode[] getSnakeDirection() {
-		KeyCode inverseKey = null;
-		KeyCode forwardKey = null;
-		Point p1 = maze.getSnakeHead();
-		List<Point> list = maze.getSnake().getList();
-		Point p2 = list.get(list.size() - 2);
-
-		if (p1.x > p2.x) {
-			inverseKey = KeyCode.LEFT;
-			forwardKey = KeyCode.RIGHT;
-		} else if (p1.x < p2.x) {
-			inverseKey = KeyCode.RIGHT;
-			forwardKey = KeyCode.LEFT;
-		} else if (p1.x == p2.x) {
-			if (p1.y > p2.y) {
-				inverseKey = KeyCode.DOWN;
-				forwardKey = KeyCode.UP;
-			} else if (p1.y < p2.y) {
-				inverseKey = KeyCode.UP;
-				forwardKey = KeyCode.DOWN;
-			}
-		}
-		return new KeyCode[]{inverseKey,forwardKey};
-	}
-
-	/**
-	 * 根据keyCode设置下一个point和保存当前KeyCode
-	 * 
-	 * @param key
-	 */
-	private void setPointByKey(KeyCode key) {
-		switch (key) {
-		case UP:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row - 1, maze.getSnakeHead().col);
-			currentKey = negativeIgnore(key);
-			break;
-		case DOWN:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row + 1, maze.getSnakeHead().col);
-			currentKey = negativeIgnore(key);
-			break;
-		case LEFT:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col - 1);
-			currentKey = negativeIgnore(key);
-			break;
-		case RIGHT:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col + 1);
-			currentKey = negativeIgnore(key);
-			break;
-		default:
-			break;
-		}
-	}
-
-	public static void main(String[] args) {
-		initApp();
-		launch(args);// 启动程序
-	}
-
-	/**
-	 * 将数组画到画布
-	 * 
-	 * @param m
-	 */
-	private void paintArray(Maze m) {
+	private void showHelpInfo() {
 		// 画背景
 		pen.setFill(Color.WHITE);
 		pen.fillRect(0, 0, frame_width, frame_width);
+		// 设置字体大小
+		pen.setFont(new Font(25));
+		// 设置文字颜色
+		pen.setFill(Color.BLACK);
+		// 画文字
+		pen.fillText("空格 开始/暂停,ENTER 开启/关闭智能", 0 + OFFSET, HEIGHT / 2);
 
-		for (int row = 0; row < Maze.ROWSIZE; row++) {
-			for (int col = 0; col < Maze.COLSIZE; col++) {
-				Point point = m.getArrayPoint(row, col);
-				pen.setFill(point.getColor());
-				pen.fillRect(point.getSx() * FITWIDTH + OFFSET, point.getSy() * FITHEIGHT + OFFSET, FITWIDTH - 1,
-						FITHEIGHT - 1);
-			}
-		}
-
-		List<Point> snakeList = maze.getSnake().getList();
-		for (int i = 0; i < snakeList.size() - 1; i++) {
-			pen.setFill(Color.DARKMAGENTA);
-			//画直线
-			pen.strokeLine(snakeList.get(i).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
-					snakeList.get(i).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2,
-					snakeList.get(i + 1).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
-					snakeList.get(i + 1).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2);
-		}
-		for (int x = 0; x < Maze.COLSIZE; x++) {
-			// 设置字体大小
-			pen.setFont(new Font(15));
-			// 设置文字颜色
-			pen.setFill(Color.BLACK);
-			// 画文字
-			pen.fillText(x + "", OFFSET + x * FITWIDTH + (OFFSET / 2), frame_height);
-		}
-		for (int y = 0; y < Maze.ROWSIZE; y++) {
-			// 设置字体大小
-			pen.setFont(new Font(15));
-			// 设置文字颜色
-			pen.setFill(Color.BLACK);
-			// 画文字
-			pen.fillText(y + "", 0, OFFSET + HEIGHT - FITHEIGHT * (y) - (OFFSET / 2));
+		if (isAuto.getValue() == true) {
+			pen.fillText("AI:开启", 0 + OFFSET, HEIGHT / 2 + 40);
+		} else {
+			pen.fillText("AI:关闭", 0 + OFFSET, HEIGHT / 2 + 40);
 		}
 
+	}
+
+	private void showOverInfo() {
+		// 画背景
+		pen.setFill(Color.WHITE);
+		pen.fillRect(0, 0, frame_width, frame_width);
+		// 设置字体大小
+		pen.setFont(new Font(25));
+		// 设置文字颜色
+		pen.setFill(Color.BLACK);
+		// 画文字
+		pen.fillText("GAME OVER", 0 + OFFSET, HEIGHT / 3);
+
+		pen.fillText("空格从新开始", 0 + OFFSET, HEIGHT / 3 + 40);
+
+		pen.fillText("游戏结束图片保存地址:", 0 + OFFSET, HEIGHT / 3 + 80);
+		pen.setFont(new Font(20));
+		pen.fillText(overPath, 0 + OFFSET, HEIGHT / 3 + 120);
+	}
+
+	private void initTimeLine() {
+		timeLine = new Timeline();
+		timeLine.setCycleCount(Timeline.INDEFINITE);// 设置循环
+		timeLine.getKeyFrames().add(new KeyFrame(Duration.millis(speed), e -> {
+			action(timeLine);
+		}));
 	}
 
 }

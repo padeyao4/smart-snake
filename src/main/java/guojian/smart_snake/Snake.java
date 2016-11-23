@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * 蛇<br>
+ * list第一个元素为蛇尾，最后一个为蛇头
  * @author guojian
  * @date 2016年11月23日 下午11:41:30
  * @email 1181819395@qq.com
