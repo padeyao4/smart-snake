@@ -124,7 +124,7 @@ public class Point implements Serializable,Cloneable{
 		}
 	}
 	@Override
-	protected Object clone() {
+	protected Point clone() {
 		Point point = new Point(this.row, this.col, this.type);
 		return point;
 	}

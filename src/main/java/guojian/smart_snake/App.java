@@ -3,6 +3,7 @@ package guojian.smart_snake;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
@@ -45,17 +46,21 @@ import javafx.util.Duration;
  * @email 1181819395@qq.com
  */
 public class App extends Application {
-	private static final int WIDTH = 500;// 游戏区域画面宽度
-	private static final int HEIGHT = 500;// 游戏区域画面高度
+	private static int WIDTH;// 游戏区域画面宽度
+	private static int HEIGHT;// 游戏区域画面高度
 
-	private static final int FITWIDTH = WIDTH / Maze.COLSIZE;// 游戏区域，每个小方格的宽度
-	private static final int FITHEIGHT = HEIGHT / Maze.ROWSIZE;// 每个小方块的长度
+	private static int FITWIDTH;// 游戏区域，每个小方格的宽度
+	private static int FITHEIGHT;// 每个小方块的长度
 
-	private static final int OFFSET = 20;
-	private static final int frame_width = WIDTH + 2 * OFFSET;// 画面宽度
-	private static final int frame_height = HEIGHT + 2 * OFFSET;// 画面高度
+	private static int OFFSET;
+	private static int frame_width;// 画面宽度
+	private static int frame_height;// 画面高度
 
-	private static int speed = 200;
+	private static String imageDir;
+	private static String rootPath;
+	private static String saveImage;
+
+	private static int speed;
 
 	private GraphicsContext pen;// 画笔
 	private Scene scene;// 场景
@@ -64,6 +69,28 @@ public class App extends Application {
 	private Point nextPoint;// 蛇一下步移动的点
 
 	private Canvas cvs;
+
+	private static void initApp() {
+		try {
+			ResourceBundle bundle = ResourceBundle.getBundle("config");
+			WIDTH = Integer.parseInt(bundle.getString("screenWidth"));
+			HEIGHT = Integer.parseInt(bundle.getString("screenHeight"));
+			FITWIDTH = WIDTH / Maze.COLSIZE;
+			FITHEIGHT = HEIGHT / Maze.ROWSIZE;
+			OFFSET = Integer.parseInt(bundle.getString("offset"));
+			frame_width = WIDTH + 2 * OFFSET;
+			frame_height = HEIGHT + 2 * OFFSET;
+			imageDir = bundle.getString("imageDir");
+			speed = Integer.parseInt(bundle.getString("speed"));
+			rootPath = bundle.getString("rootPath");
+			saveImage = bundle.getString("saveImage");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("config.properties填写错误");
+			System.exit(1);
+		}
+
+	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -93,7 +120,6 @@ public class App extends Application {
 		scene.setOnKeyPressed(e -> {
 			controller(e.getCode(), timeLine);
 		});
-
 	}
 
 	private void paintHelpInfo(String msg, int offset, int fontSize) {
@@ -119,6 +145,7 @@ public class App extends Application {
 	}
 
 	private boolean isArtificial = false;
+	private Game status=Game.stoped;
 
 	/**
 	 * 游戏每隔间断时间后实行的动作
@@ -127,55 +154,53 @@ public class App extends Application {
 	 */
 	private void action(Timeline timeLine) {
 		if (isArtificial) {
-			try {
-				/* computerSnakeRun(); */
-				smartSnakeRun();
-			} catch (Exception e) {
-				e.printStackTrace();
-				timeLine.pause();
-				timeLine.stop();
-				timeLine = null;
-				nextPoint = null;
-				return;
-			}
+			smartSnakeRun();
 		} else {
-			setPointAndCurrentDirectByKey(currentKey);// 保持上一次方向运动
+			setPointByKey(currentKey);// 保持上一次方向运动
 		}
-		Game status = maze.snakeMove(nextPoint);
-		if (status == Game.eatApple) {
+
+		status = maze.snakeMove(nextPoint);
+		if (status == Game.apple) {
 			maze.randomApple();
 		} else if (status == Game.over) {// 当游戏返回over时，结束游戏
-			/* paintHelpInfo("GAME OVER", 80, 40); */
-			timeLine.pause();
+			paintHelpInfo("GAME OVER", 80, 40);
 			timeLine.stop();
-			timeLine = null;
-			nextPoint = null;
 			return;
 		}
+
 		paintArray(maze);
-		saveImageLocal();
+
+		if (saveImage.trim().equals("true")) {
+			saveImageLocal();
+		}
 	}
 
-	private void smartSnakeRun() throws CloneNotSupportedException, InterruptedException {
+	private void smartSnakeRun() {
 		Path shortPath = BFS.searchShortPath(maze.getSnakeHead(), maze.getApple(), maze.getArray());
 		if (shortPath.isEmpty()) {// 找不到苹果
 			// 走离蛇身的最远距离
 			Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
 			if (longPath.isEmpty()) {// 路径为空
 				System.out.println("Game over");
-				Thread.sleep(100000000);
+				nextPoint = null;
 			} else {
 				nextPoint = longPath.getNextPoint();
 			}
 		} else {// 找到苹果
 			// 试探走一步
-			Maze cloneMaze = (Maze) maze.clone();
+			Maze cloneMaze = maze.clone();
 			cloneMaze.snakeMove(shortPath.getNextPoint());
 			// 找尾巴。找的到表示安全
 			Path clonePath = BFS.searchShortPath(cloneMaze.getSnake().getHead(), cloneMaze.getSnake().getTail(),
 					cloneMaze.getArray());
 			if (clonePath.size() > 2) {// 试探走一步后，蛇头离蛇尾距离大于2，安全。
-				nextPoint = shortPath.getNextPoint();
+				Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
+				if (shortPath.size() <= longPath.size()) {
+					nextPoint = shortPath.getNextPoint();
+				} else {
+					nextPoint = longPath.getNextPoint();
+				}
+
 			} else {// 蛇头紧挨蛇尾
 					// 走离蛇身的最远距离
 				Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
@@ -190,76 +215,34 @@ public class App extends Application {
 		}
 	}
 
-	private String imageDir;
+	private String dir;
 
 	/**
 	 * 将游戏执行图片保存到本地
 	 */
-	private void saveImageLocal() {
-		String snakedirStr = System.getProperty("user.home") + File.separatorChar + "snakeImage";
+	public void saveImageLocal() {
+		String snakedirStr = System.getProperty(rootPath) + File.separatorChar + imageDir;
 		File snakedir = new File(snakedirStr);
+
 		if (!snakedir.exists()) {
 			snakedir.mkdirs();
 		}
-		if (imageDir == null) {
-			imageDir = System.currentTimeMillis() + "";
-			new File(snakedirStr + File.separatorChar + imageDir).mkdir();
+
+		if (dir == null) {
+			dir = System.currentTimeMillis() + "";
+			new File(snakedirStr + File.separatorChar + dir).mkdir();
 		}
 
 		WritableImage image = cvs.snapshot(new SnapshotParameters(), null);
 		try {
-			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", new File(snakedirStr + File.separatorChar
-					+ imageDir + File.separatorChar + System.currentTimeMillis() + ".png"));
+			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", new File(
+					snakedirStr + File.separatorChar + dir + File.separatorChar + System.currentTimeMillis() + ".png"));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 	}
 
-	/**
-	 * 自动执行
-	 * 
-	 * @throws Exception
-	 */
-	/*
-	 * private void computerSnakeRun() throws Exception { Path path =
-	 * BFS.findAppleShortPath(maze.getSnakeHead(), maze.getApple(),
-	 * maze.getArray());
-	 * 
-	 * if (path.hasPath()) {// 找到苹果 Maze cloneMaze = (Maze) maze.clone();//
-	 * 复制Maze cloneMaze.snakeMove(path.getNextPoint());
-	 * 
-	 * Path cpt = BFS.findTailShortPath(cloneMaze.getSnakeHead(),
-	 * cloneMaze.getSnakeTail(), cloneMaze.getArray()); if (cpt.hasPath()) {//
-	 * 蛇向苹果走一步后，可以找到蛇尾 System.out.println("//蛇向苹果走一步后，可以找到蛇尾"); nextPoint =
-	 * path.getNextPoint(); } else {// 蛇向苹果走一步后，不能找到蛇尾 Path tailPath =
-	 * BFS.findTailShortPath(maze.getSnakeHead(), maze.getSnakeTail(),
-	 * maze.getArray()); if (tailPath.hasPath()) {//
-	 * 蛇找的到苹果，也找的到尾巴。如果蛇向苹果走一步就找不到尾巴 // 走蛇尾的最远距离 Path farPath =
-	 * BFS.findFarTailPath(maze.getSnakeHead(), maze.getSnakeTail(),
-	 * maze.getArray()); if (farPath.getSize() == 2) {// 蛇走蛇尾的最长距离，走一步就吃到蛇尾
-	 * System.out.println("蛇走蛇尾的最长距离，走一步就吃到蛇尾,蛇走蛇身的最长距离"); // 蛇走蛇身的最长距离 Path
-	 * farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(),
-	 * maze.getSnake().getBodys(), maze.getArray()); nextPoint =
-	 * farBodyPath.getNextPoint(); } else {// 蛇走蛇尾的最远距离 nextPoint =
-	 * farPath.getNextPoint(); } } else {// 真蛇找不到蛇尾 找的到苹果 // 走离蛇头最远的蛇身的最远距离
-	 * System.out.println("//真蛇找不到蛇尾 找的到苹果// 走离蛇头最远的蛇身的最远距离"); Path farBodyPath
-	 * = BFS.findFarBodyPath(maze.getSnakeHead(), maze.getSnake().getBodys(),
-	 * maze.getArray()); nextPoint = farBodyPath.getNextPoint(); } } } else {//
-	 * 找不到苹果 Path tailPath = BFS.findTailShortPath(maze.getSnakeHead(),
-	 * maze.getSnakeTail(), maze.getArray()); if (tailPath.hasPath()) {//
-	 * 找不到苹果，找的到蛇尾 // 离蛇尾的最远距离 Path farPath =
-	 * BFS.findFarTailPath(maze.getSnakeHead(), maze.getSnakeTail(),
-	 * maze.getArray()); if (farPath.getSize() == 2) {// 找不到苹果，蛇头走蛇尾最远距离走一步咬到蛇尾
-	 * // 走离蛇身的最远距离 Path farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(),
-	 * maze.getSnake().getBodys(), maze.getArray()); nextPoint =
-	 * farBodyPath.getNextPoint(); } else {// 找不到苹果，蛇头走蛇尾最远距离，且咬不到蛇尾 nextPoint =
-	 * farPath.getNextPoint(); } } else {// 找不到苹果，找不到蛇尾 // 走离蛇头最远的蛇身的最远距离 Path
-	 * farBodyPath = BFS.findFarBodyPath(maze.getSnakeHead(),
-	 * maze.getSnake().getBodys(), maze.getArray()); nextPoint =
-	 * farBodyPath.getNextPoint(); } } }
-	 */
-
-	private KeyCode currentKey;
+	private KeyCode currentKey = KeyCode.DOWN;// 保存上一次按键的方向
 
 	/**
 	 * 监听按键，并执行对应的方法
@@ -268,25 +251,93 @@ public class App extends Application {
 	 * @param timeLine
 	 */
 	private void controller(KeyCode key, Timeline timeLine) {
-		if (nextPoint == null && timeLine.getStatus() == Status.STOPPED) {
-
-			/*
-			 * if (key == KeyCode.UP || key == KeyCode.DOWN || key ==
-			 * KeyCode.LEFT || key == KeyCode.RIGHT) { timeLine.play(); }
-			 */
+		if (timeLine.getStatus() == Status.STOPPED) {
+			// 按方向键开始游戏
+			if (key == KeyCode.UP || key == KeyCode.DOWN || key == KeyCode.LEFT || key == KeyCode.RIGHT) {
+				timeLine.play();
+				if (key == KeyCode.DOWN) {
+					currentKey = KeyCode.UP;
+				} else {
+					currentKey = key;
+				}
+				paintArray(maze);// 第一次显示
+				return;
+			}
 
 			if (key == KeyCode.ENTER) {
 				if (isArtificial == false) {
 					timeLine.play();
 					isArtificial = true;
 					paintArray(maze);// 第一次显示
+					return;
+				}
+			}
+		} else if (timeLine.getStatus() == Status.RUNNING) {
+			if (key == KeyCode.SPACE) {
+				timeLine.pause();
+				return;
+			} else if (key == KeyCode.ENTER) {
+				if (isArtificial == false) {
+					isArtificial = true;
+					return;
+				} else {
+					isArtificial = false;
+					currentKey=getSnakeDirection()[1];
+					return;
 				}
 			}
 
+		} else if (timeLine.getStatus() == Status.PAUSED) {
+			if (key == KeyCode.SPACE) {
+				timeLine.play();
+				return;
+			} else if (key == KeyCode.ENTER) {
+				if (isArtificial == false) {
+					timeLine.play();
+					isArtificial = true;
+					return;
+				}
+			}
 		}
+		setPointByKey(key);// 控制
+	}
 
-		setPointAndCurrentDirectByKey(key);// 方向键控制下一个点
+	private KeyCode negativeIgnore(KeyCode key) {
+		KeyCode inverseKey = getSnakeDirection()[0];
+		if (key == inverseKey) {
+			return currentKey;
+		} else {
+			return key;
+		}
+	}
 
+	/**
+	 * 
+	 * @return 第一个key 为 蛇运动的反方向，第二个key为蛇运动的正方向
+	 */
+	private KeyCode[] getSnakeDirection() {
+		KeyCode inverseKey = null;
+		KeyCode forwardKey = null;
+		Point p1 = maze.getSnakeHead();
+		List<Point> list = maze.getSnake().getList();
+		Point p2 = list.get(list.size() - 2);
+
+		if (p1.x > p2.x) {
+			inverseKey = KeyCode.LEFT;
+			forwardKey = KeyCode.RIGHT;
+		} else if (p1.x < p2.x) {
+			inverseKey = KeyCode.RIGHT;
+			forwardKey = KeyCode.LEFT;
+		} else if (p1.x == p2.x) {
+			if (p1.y > p2.y) {
+				inverseKey = KeyCode.DOWN;
+				forwardKey = KeyCode.UP;
+			} else if (p1.y < p2.y) {
+				inverseKey = KeyCode.UP;
+				forwardKey = KeyCode.DOWN;
+			}
+		}
+		return new KeyCode[]{inverseKey,forwardKey};
 	}
 
 	/**
@@ -294,23 +345,23 @@ public class App extends Application {
 	 * 
 	 * @param key
 	 */
-	private void setPointAndCurrentDirectByKey(KeyCode key) {
+	private void setPointByKey(KeyCode key) {
 		switch (key) {
 		case UP:
 			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row - 1, maze.getSnakeHead().col);
-			currentKey = key;
+			currentKey = negativeIgnore(key);
 			break;
 		case DOWN:
 			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row + 1, maze.getSnakeHead().col);
-			currentKey = key;
+			currentKey = negativeIgnore(key);
 			break;
 		case LEFT:
 			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col - 1);
-			currentKey = key;
+			currentKey = negativeIgnore(key);
 			break;
 		case RIGHT:
 			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col + 1);
-			currentKey = key;
+			currentKey = negativeIgnore(key);
 			break;
 		default:
 			break;
@@ -318,6 +369,7 @@ public class App extends Application {
 	}
 
 	public static void main(String[] args) {
+		initApp();
 		launch(args);// 启动程序
 	}
 
@@ -343,6 +395,7 @@ public class App extends Application {
 		List<Point> snakeList = maze.getSnake().getList();
 		for (int i = 0; i < snakeList.size() - 1; i++) {
 			pen.setFill(Color.DARKMAGENTA);
+			//画直线
 			pen.strokeLine(snakeList.get(i).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
 					snakeList.get(i).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2,
 					snakeList.get(i + 1).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
@@ -354,7 +407,7 @@ public class App extends Application {
 			// 设置文字颜色
 			pen.setFill(Color.BLACK);
 			// 画文字
-			pen.fillText(x + "", OFFSET + x * FITWIDTH, frame_height);
+			pen.fillText(x + "", OFFSET + x * FITWIDTH + (OFFSET / 2), frame_height);
 		}
 		for (int y = 0; y < Maze.ROWSIZE; y++) {
 			// 设置字体大小
@@ -362,7 +415,7 @@ public class App extends Application {
 			// 设置文字颜色
 			pen.setFill(Color.BLACK);
 			// 画文字
-			pen.fillText(y + "", 0, frame_height - OFFSET - FITHEIGHT * y);
+			pen.fillText(y + "", 0, OFFSET + HEIGHT - FITHEIGHT * (y) - (OFFSET / 2));
 		}
 
 	}

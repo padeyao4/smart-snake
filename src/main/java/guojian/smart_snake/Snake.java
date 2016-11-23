@@ -41,11 +41,11 @@ public class Snake implements Serializable,Cloneable{
 	}
 	
 	@Override
-	protected Object clone() throws CloneNotSupportedException {
+	protected Snake clone()   {
 		Snake s = new Snake();
-		for(int i=0;i<list.size();i++){
-			s.getList().add(new Point(list.get(i).row,list.get(i).col,list.get(i).type));
-		}
+		list.forEach(p->{
+			s.list.add(p.clone());
+		});
 		return s;
 	}
 	

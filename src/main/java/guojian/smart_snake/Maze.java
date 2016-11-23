@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.ResourceBundle;
 
 /**
  * <p>
@@ -18,8 +19,9 @@ import java.util.Random;
  * @email 1181819395@qq.com
  */
 public class Maze implements Serializable, Cloneable {
-	public static final int COLSIZE = 10;
-	public static final int ROWSIZE = 10;
+	private static ResourceBundle bundle=ResourceBundle.getBundle("config");
+	public static final int COLSIZE = Integer.parseInt(bundle.getString("cols"));
+	public static final int ROWSIZE = Integer.parseInt(bundle.getString("rows"));
 	private static final long serialVersionUID = -4768606043555585626L;
 
 	private Point apple;// 苹果
@@ -30,25 +32,15 @@ public class Maze implements Serializable, Cloneable {
 		array = new Point[ROWSIZE][COLSIZE];
 	}
 
-	public Object clone() throws CloneNotSupportedException {
-		/*
-		 * try { ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		 * ObjectOutputStream oos = new ObjectOutputStream(bos);
-		 * oos.writeObject(this); // 反序列化 ByteArrayInputStream bis = new
-		 * ByteArrayInputStream(bos.toByteArray()); ObjectInputStream ois = new
-		 * ObjectInputStream(bis); return ois.readObject(); } catch
-		 * (ClassNotFoundException e) { e.printStackTrace(); } catch
-		 * (IOException e) { e.printStackTrace(); }
-		 */
+	public Maze clone()   {
 		Maze clone = new Maze();
-		clone.apple = (Point) this.apple.clone();
-		clone.snake = (Snake) this.snake.clone();
+		clone.apple = this.apple.clone();
+		clone.snake = this.snake.clone();
 		for (int row = 0; row < ROWSIZE; row++) {
 			for (int col = 0; col < COLSIZE; col++) {
-				clone.array[row][col] = (Point) this.array[row][col].clone();
+				clone.array[row][col] = this.array[row][col].clone();
 			}
 		}
-
 		return clone;
 	}
 
@@ -155,18 +147,19 @@ public class Maze implements Serializable, Cloneable {
 		}
 	}
 
+	
 	public Game snakeMove(Point point) {
 		if (point == null) {
 			return Game.over;
 		}
 		Type type = point.getType();
-		if (type == Type.Head || type == Type.Body || type == Type.Tail) {
+		if (type == Type.Head || type == Type.Body || type == Type.Tail||type==Type.Wall) {
 			return Game.over;
 		} else if (type == Type.Apple) {
 			mazeClearSnake();
 			snake.eatApple(point);
 			snakeIntoMaze();
-			return Game.eatApple;
+			return Game.apple;
 		} else if (type == Type.Cell) {
 			mazeClearSnake();
 			snake.move(point);
