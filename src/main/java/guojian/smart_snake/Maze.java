@@ -19,23 +19,25 @@ import java.util.ResourceBundle;
  * @email 1181819395@qq.com
  */
 public class Maze implements Serializable, Cloneable {
-	private static ResourceBundle bundle=ResourceBundle.getBundle("config");
+	private static ResourceBundle bundle = ResourceBundle.getBundle("config");
 	public static final int COLSIZE = Integer.parseInt(bundle.getString("cols"));
 	public static final int ROWSIZE = Integer.parseInt(bundle.getString("rows"));
 	private static final long serialVersionUID = -4768606043555585626L;
 
-	private Point apple;// 苹果
-	private Point[][] array;//
-	private Snake snake;
+	Point apple;// 苹果
+	Point[][] array;//
+	Snake snake;
 
 	public Maze() {
 		array = new Point[ROWSIZE][COLSIZE];
 	}
 
-	public Maze clone()   {
+	public Maze clone() {
 		Maze clone = new Maze();
 		clone.apple = this.apple.clone();
 		clone.snake = this.snake.clone();
+		clone.apple = this.apple.clone();
+
 		for (int row = 0; row < ROWSIZE; row++) {
 			for (int col = 0; col < COLSIZE; col++) {
 				clone.array[row][col] = this.array[row][col].clone();
@@ -129,9 +131,13 @@ public class Maze implements Serializable, Cloneable {
 				}
 			}
 		}
-		Point point = list.get(new Random().nextInt(list.size()));
-		apple = new Point(point.getRow(), point.getCol(), Type.Apple);
-		setPoint(apple);
+		if(list.size()==0){
+			System.out.println("恭喜,屏幕吃满了");
+		}else{
+			Point point = list.get(new Random().nextInt(list.size()));
+			apple = new Point(point.getRow(), point.getCol(), Type.Apple);
+			setPoint(apple);
+		}
 	}
 
 	private void setPoint(Point p) {
@@ -147,13 +153,12 @@ public class Maze implements Serializable, Cloneable {
 		}
 	}
 
-	
 	public SnakeStatus snakeMove(Point point) {
 		if (point == null) {
 			return SnakeStatus.die;
 		}
 		Type type = point.getType();
-		if (type == Type.Head || type == Type.Body || type == Type.Tail||type==Type.Wall) {
+		if (type == Type.Head || type == Type.Body || type == Type.Tail || type == Type.Wall) {
 			return SnakeStatus.die;
 		} else if (type == Type.Apple) {
 			mazeClearSnake();
