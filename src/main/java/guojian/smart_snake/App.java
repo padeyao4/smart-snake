@@ -8,7 +8,6 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileSystemView;
 
-import guojian.smart_snake.BFS.*;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -81,8 +80,8 @@ public class App extends Application {
 			speed = Integer.parseInt(bundle.getString("speed"));
 			rootPath = bundle.getString("rootPath");
 			saveImage = bundle.getString("saveImage");
-			userDir=bundle.getString("userDir");
-			saveGameOverImage=bundle.getString("saveGameOverImage");
+			userDir = bundle.getString("userDir");
+			saveGameOverImage = bundle.getString("saveGameOverImage");
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("config.properties填写错误");
@@ -139,7 +138,7 @@ public class App extends Application {
 	 */
 	private void action(Timeline timeLine) {
 		if (isAuto.get()) {// 智能运行
-			smartSnakeRun();
+			simpleAI();
 		} else {// 手动运行
 			setPointByKey(currentKey);// ，保持上一次方向运动
 		}
@@ -165,16 +164,18 @@ public class App extends Application {
 	}
 
 	private String overPath;
+
 	private void saveGameOverImage() {
-		if(saveGameOverImage.trim().equals("true")){
+		if (saveGameOverImage.trim().equals("true")) {
 			File desktopDir = FileSystemView.getFileSystemView().getHomeDirectory();
 			String desktopPath = desktopDir.getAbsolutePath();
-			String deskdir = desktopPath+File.separatorChar+userDir;
+			String deskdir = desktopPath + File.separatorChar + userDir;
 			File d = new File(deskdir);
-			if(!d.exists()){
+			if (!d.exists()) {
 				d.mkdirs();
-			};
-			overPath=deskdir+File.separatorChar+System.currentTimeMillis()+".png";
+			}
+			;
+			overPath = deskdir + File.separatorChar + System.currentTimeMillis() + ".png";
 			saveImage(new File(overPath));
 		}
 	}
@@ -222,7 +223,7 @@ public class App extends Application {
 				timeLine.pause();
 				showHelpInfo();
 				return;
-			}else if(key==KeyCode.P){
+			} else if (key == KeyCode.P) {
 				timeLine.pause();
 				return;
 			}
@@ -240,11 +241,11 @@ public class App extends Application {
 					currentKey = getSnakeDirection()[1];
 					return;
 				}
-			}else if (key == KeyCode.P) {
+			} else if (key == KeyCode.P) {
 				timeLine.play();
 				paintMzae();
 				return;
-			} 
+			}
 		}
 		setPointByKey(key);// 控制蛇移动的方向
 	}
@@ -325,6 +326,10 @@ public class App extends Application {
 					snakeList.get(i + 1).getSx() * FITWIDTH + OFFSET + FITWIDTH / 2,
 					snakeList.get(i + 1).getSy() * FITHEIGHT + OFFSET + FITHEIGHT / 2);
 		}
+		
+		if(OFFSET==0){
+			return;
+		}
 		for (int x = 0; x < Maze.COLSIZE; x++) {
 			// 设置字体大小
 			pen.setFont(new Font(15));
@@ -387,15 +392,15 @@ public class App extends Application {
 			currentKey = negativeIgnore(key);
 			break;
 		case DOWN:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow()  + 1, maze.getSnakeHead().getCol());
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow() + 1, maze.getSnakeHead().getCol());
 			currentKey = negativeIgnore(key);
 			break;
 		case LEFT:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow() , maze.getSnakeHead().getCol() - 1);
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow(), maze.getSnakeHead().getCol() - 1);
 			currentKey = negativeIgnore(key);
 			break;
 		case RIGHT:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow() , maze.getSnakeHead().getCol() + 1);
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow(), maze.getSnakeHead().getCol() + 1);
 			currentKey = negativeIgnore(key);
 			break;
 		default:
@@ -403,43 +408,68 @@ public class App extends Application {
 		}
 	}
 
-	private void smartSnakeRun() {
-		Path shortPath = BFS.searchShortPath(maze.getSnakeHead(), maze.getApple(), maze.getArray());
-		if (shortPath.isEmpty()) {// 找不到苹果
-			// 走离蛇身的最远距离
-			Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
-			if (longPath.isEmpty()) {// 路径为空
-				System.out.println("Game over");
-				nextPoint = null;// nextPoint为空时游戏结束
-			} else {
-				nextPoint = longPath.getNextPoint();
-			}
-		} else {// 找到苹果
-			// 试探走一步
-			Maze cloneMaze = maze.clone();
-			cloneMaze.snakeMove(shortPath.getNextPoint());
-			// 找尾巴。找的到表示安全
-			Path clonePath = BFS.searchShortPath(cloneMaze.getSnake().getHead(), cloneMaze.getSnake().getTail(),
-					cloneMaze.getArray());
-			if (clonePath.size() > 2) {// 试探走一步后，蛇头离蛇尾距离大于2，安全。
-				Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
-				if (shortPath.size() <= longPath.size()) {
-					nextPoint = shortPath.getNextPoint();
-				} else {
-					nextPoint = longPath.getNextPoint();
-				}
+	class Path {
+		public Path(Point nextPoint, int value2) {
+			this.point = nextPoint;
+			this.value = value2;
+		}
 
-			} else {// 蛇头紧挨蛇尾,或者找不到蛇尾
-					// 走离蛇身的最远距离
-				Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
-				if (longPath.isEmpty()) {// 路径为空
-					nextPoint = shortPath.getNextPoint();
-				} else {// 走最远距离
-					nextPoint = longPath.getNextPoint();
+		Point point;
+		int value;
+	}
+	
+
+	/**
+	 * 贪食蛇AI的最要逻辑<br>
+	 * 如果要修改.maze.list是一个二维数组，保存当前画面的全部坐标<br>
+	 * maze.snake 是一个一维数组，保存蛇的全部坐标<br>
+	 * maze.apple 当前苹果的坐标<br>
+	 * simpleAI主要 修改了nextPoint,告诉蛇下一步走哪里。nextPoint是maze.list中的一个点
+	 */
+	public void simpleAI() {
+		List<Point> lt = BFS.searchLongPath(maze.snake.getHead(), maze.snake.getTail(), maze.array);
+		if (lt.size() > 0) {// 可以找到尾巴
+
+			List<Point> sa = BFS.searchShortPath(maze.snake.getHead(), maze.apple, maze.array);
+			if (sa.size() > 0) {// 找的到苹果
+				Maze cm = maze.clone();
+				SnakeStatus s = cm.snakeMove(sa.get(1));// 假想 蛇向苹果走了一步
+				List<Point> clt = BFS.searchLongPath(cm.snake.getHead(), cm.snake.getTail(), cm.array);
+				if(s==SnakeStatus.eat){
+					if (clt.size() > 4) {// 还能找到尾巴
+						nextPoint = sa.get(1);
+					} else {
+						if (lt.size() < 2) {
+							nextPoint = null;
+						} else {
+							nextPoint = lt.get(1);// 走离尾巴的最远路径
+						}
+					}
+				}else{
+					if (clt.size() > 2) {// 还能找到尾巴
+						nextPoint = sa.get(1);
+					} else {
+						if (lt.size() < 2) {
+							nextPoint = null;
+						} else {
+							nextPoint = lt.get(1);// 走离尾巴的最远路径
+						}
+					}
+				}
+				
+
+			} else {// 找不到苹果
+				if (lt.size() < 2) {
+					nextPoint = null;
+				} else {
+					nextPoint = lt.get(1);// 走离尾巴的最远路径
 				}
 			}
+		} else {
+			nextPoint = null;// 游戏结束
 		}
 	}
+
 
 	private Timeline timeLine = null;// 定时，动画
 
@@ -480,13 +510,13 @@ public class App extends Application {
 		pen.setFill(Color.WHITE);
 		pen.fillRect(0, 0, frame_width, frame_width);
 		// 设置字体大小
-		pen.setFont(new Font(17));
+		pen.setFont(new Font(15));
 		// 设置文字颜色
 		pen.setFill(Color.BLACK);
 		// 画文字
-		pen.fillText("空格: 开始/暂停",  OFFSET, HEIGHT / 2);
-		pen.fillText("ENTER: 开启/关闭智能",  OFFSET, HEIGHT / 2+40);
-		pen.fillText("修改速度: 修改配置文件config.properties中的speed数据",OFFSET, HEIGHT / 2-40);
+		pen.fillText("空格: 开始/暂停", OFFSET, HEIGHT / 2);
+		pen.fillText("ENTER: 开启/关闭智能", OFFSET, HEIGHT / 2 + 40);
+		pen.fillText("修改速度: 修改配置文件config.properties中的speed数据", OFFSET, HEIGHT / 2 - 40);
 
 		if (isAuto.getValue() == true) {
 			pen.fillText("AI:开启", 0 + OFFSET, HEIGHT / 2 + 80);
@@ -510,7 +540,7 @@ public class App extends Application {
 		pen.fillText("空格从新开始", 0 + OFFSET, HEIGHT / 3 + 40);
 
 		pen.fillText("游戏结束图片保存地址:", 0 + OFFSET, HEIGHT / 3 + 80);
-		pen.setFont(new Font(15));
+		pen.setFont(new Font(14));
 		pen.fillText(overPath, 0 + OFFSET, HEIGHT / 3 + 120);
 	}
 

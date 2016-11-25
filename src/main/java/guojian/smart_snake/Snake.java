@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Snake implements Serializable,Cloneable{
 	private static final long serialVersionUID = 1211631935294087884L;
-	private List<Point> list = new LinkedList<>();//第一个元素为蛇尾
+	private List<Point> list = new LinkedList<>();//第一个元素为蛇尾，最后一个元素为蛇头
 	
 	/**
 	 * 蛇吃苹果
