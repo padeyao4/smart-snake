@@ -222,6 +222,9 @@ public class App extends Application {
 				timeLine.pause();
 				showHelpInfo();
 				return;
+			}else if(key==KeyCode.P){
+				timeLine.pause();
+				return;
 			}
 		} else if (timeLine.getStatus() == Status.PAUSED) {
 			if (key == KeyCode.SPACE) {
@@ -237,7 +240,11 @@ public class App extends Application {
 					currentKey = getSnakeDirection()[1];
 					return;
 				}
-			}
+			}else if (key == KeyCode.P) {
+				timeLine.play();
+				paintMzae();
+				return;
+			} 
 		}
 		setPointByKey(key);// 控制蛇移动的方向
 	}
@@ -253,17 +260,17 @@ public class App extends Application {
 		List<Point> list = maze.getSnake().getList();
 		Point p2 = list.get(list.size() - 2);
 
-		if (p1.x > p2.x) {
+		if (p1.getX() > p2.getX()) {
 			inverseKey = KeyCode.LEFT;
 			forwardKey = KeyCode.RIGHT;
-		} else if (p1.x < p2.x) {
+		} else if (p1.getX() < p2.getX()) {
 			inverseKey = KeyCode.RIGHT;
 			forwardKey = KeyCode.LEFT;
-		} else if (p1.x == p2.x) {
-			if (p1.y > p2.y) {
+		} else if (p1.getX() == p2.getX()) {
+			if (p1.getY() > p2.getY()) {
 				inverseKey = KeyCode.DOWN;
 				forwardKey = KeyCode.UP;
-			} else if (p1.y < p2.y) {
+			} else if (p1.getY() < p2.getY()) {
 				inverseKey = KeyCode.UP;
 				forwardKey = KeyCode.DOWN;
 			}
@@ -313,10 +320,10 @@ public class App extends Application {
 		for (int i = 0; i < snakeList.size() - 1; i++) {
 			pen.setFill(Color.DARKMAGENTA);
 			// 画直线
-			pen.strokeLine(snakeList.get(i).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
-					snakeList.get(i).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2,
-					snakeList.get(i + 1).sx * FITWIDTH + OFFSET + FITWIDTH / 2,
-					snakeList.get(i + 1).sy * FITHEIGHT + OFFSET + FITHEIGHT / 2);
+			pen.strokeLine(snakeList.get(i).getSx() * FITWIDTH + OFFSET + FITWIDTH / 2,
+					snakeList.get(i).getSy() * FITHEIGHT + OFFSET + FITHEIGHT / 2,
+					snakeList.get(i + 1).getSx() * FITWIDTH + OFFSET + FITWIDTH / 2,
+					snakeList.get(i + 1).getSy() * FITHEIGHT + OFFSET + FITHEIGHT / 2);
 		}
 		for (int x = 0; x < Maze.COLSIZE; x++) {
 			// 设置字体大小
@@ -376,19 +383,19 @@ public class App extends Application {
 	private void setPointByKey(KeyCode key) {
 		switch (key) {
 		case UP:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row - 1, maze.getSnakeHead().col);
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow() - 1, maze.getSnakeHead().getCol());
 			currentKey = negativeIgnore(key);
 			break;
 		case DOWN:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row + 1, maze.getSnakeHead().col);
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow()  + 1, maze.getSnakeHead().getCol());
 			currentKey = negativeIgnore(key);
 			break;
 		case LEFT:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col - 1);
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow() , maze.getSnakeHead().getCol() - 1);
 			currentKey = negativeIgnore(key);
 			break;
 		case RIGHT:
-			nextPoint = maze.getArrayPoint(maze.getSnakeHead().row, maze.getSnakeHead().col + 1);
+			nextPoint = maze.getArrayPoint(maze.getSnakeHead().getRow() , maze.getSnakeHead().getCol() + 1);
 			currentKey = negativeIgnore(key);
 			break;
 		default:
@@ -422,14 +429,12 @@ public class App extends Application {
 					nextPoint = longPath.getNextPoint();
 				}
 
-			} else {// 蛇头紧挨蛇尾
+			} else {// 蛇头紧挨蛇尾,或者找不到蛇尾
 					// 走离蛇身的最远距离
 				Path longPath = BFS.searchBodysPath(maze.getSnakeHead(), maze.getSnake(), maze.getArray());
 				if (longPath.isEmpty()) {// 路径为空
-					System.out.println("蛇头紧挨蛇尾,最远路径为空");
 					nextPoint = shortPath.getNextPoint();
 				} else {// 走最远距离
-					System.out.println("蛇头紧挨蛇尾,走最远路径");
 					nextPoint = longPath.getNextPoint();
 				}
 			}
@@ -475,16 +480,18 @@ public class App extends Application {
 		pen.setFill(Color.WHITE);
 		pen.fillRect(0, 0, frame_width, frame_width);
 		// 设置字体大小
-		pen.setFont(new Font(25));
+		pen.setFont(new Font(17));
 		// 设置文字颜色
 		pen.setFill(Color.BLACK);
 		// 画文字
-		pen.fillText("空格 开始/暂停,ENTER 开启/关闭智能", 0 + OFFSET, HEIGHT / 2);
+		pen.fillText("空格: 开始/暂停",  OFFSET, HEIGHT / 2);
+		pen.fillText("ENTER: 开启/关闭智能",  OFFSET, HEIGHT / 2+40);
+		pen.fillText("修改速度: 修改配置文件config.properties中的speed数据",OFFSET, HEIGHT / 2-40);
 
 		if (isAuto.getValue() == true) {
-			pen.fillText("AI:开启", 0 + OFFSET, HEIGHT / 2 + 40);
+			pen.fillText("AI:开启", 0 + OFFSET, HEIGHT / 2 + 80);
 		} else {
-			pen.fillText("AI:关闭", 0 + OFFSET, HEIGHT / 2 + 40);
+			pen.fillText("AI:关闭", 0 + OFFSET, HEIGHT / 2 + 80);
 		}
 
 	}
@@ -503,7 +510,7 @@ public class App extends Application {
 		pen.fillText("空格从新开始", 0 + OFFSET, HEIGHT / 3 + 40);
 
 		pen.fillText("游戏结束图片保存地址:", 0 + OFFSET, HEIGHT / 3 + 80);
-		pen.setFont(new Font(20));
+		pen.setFont(new Font(15));
 		pen.fillText(overPath, 0 + OFFSET, HEIGHT / 3 + 120);
 	}
 

@@ -73,8 +73,8 @@ public class Maze implements Serializable, Cloneable {
 	 */
 	public void initMazeSnake() {
 		Point head = new Point((int) (ROWSIZE / 2), (int) (COLSIZE / 2), Type.Head);
-		Point body = new Point(head.row + 1, head.col, Type.Body);
-		Point tail = new Point(body.row + 1, body.col, Type.Tail);
+		Point body = new Point(head.getRow() + 1, head.getCol(), Type.Body);
+		Point tail = new Point(body.getRow() + 1, body.getCol(), Type.Tail);
 		snake = new Snake();
 		snake.add(tail);
 		snake.add(body);
@@ -108,9 +108,9 @@ public class Maze implements Serializable, Cloneable {
 	 * 清理迷宫中的蛇
 	 */
 	private void mazeClearSnake() {
-		setPoint(new Point(snake.getHead().row, snake.getHead().col, Type.Cell));
+		setPoint(new Point(snake.getHead().getRow(), snake.getHead().getCol(), Type.Cell));
 		for (Point p : snake.getList()) {
-			setPoint(new Point(p.row, p.col, Type.Cell));
+			setPoint(new Point(p.getRow(), p.getCol(), Type.Cell));
 		}
 	}
 
@@ -130,12 +130,12 @@ public class Maze implements Serializable, Cloneable {
 			}
 		}
 		Point point = list.get(new Random().nextInt(list.size()));
-		apple = new Point(point.row, point.col, Type.Apple);
+		apple = new Point(point.getRow(), point.getCol(), Type.Apple);
 		setPoint(apple);
 	}
 
 	private void setPoint(Point p) {
-		array[p.row][p.col] = p;
+		array[p.getRow()][p.getCol()] = p;
 	}
 
 	/**

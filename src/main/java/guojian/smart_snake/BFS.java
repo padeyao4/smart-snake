@@ -22,7 +22,7 @@ import java.util.Set;
 public class BFS {
 
 	private static boolean isNear(Point a, Point b) {
-		return (Math.abs(a.x - b.x) == 1 && a.y == b.y) || (a.x == b.x && Math.abs(a.y - b.y) == 1);
+		return (Math.abs(a.getX() - b.getX()) == 1 && a.getY() == b.getY()) || (a.getX() == b.getX() && Math.abs(a.getY() - b.getY()) == 1);
 	}
 
 	/**
@@ -33,14 +33,14 @@ public class BFS {
 	 * @return 返回按离p2近排序的list
 	 */
 	protected static List<Point> get4PointSortByDist(Point[][] array, Point p1,Point p2) {
-		List<Point> sourceList = Arrays.asList(new Point[] { array[p1.row + 1][p1.col], array[p1.row - 1][p1.col],
-				array[p1.row][p1.col - 1], array[p1.row][p1.col + 1] });
+		List<Point> sourceList = Arrays.asList(new Point[] { array[p1.getRow() + 1][p1.getCol()], array[p1.getRow() - 1][p1.getCol()],
+				array[p1.getRow()][p1.getCol() - 1], array[p1.getRow()][p1.getCol() + 1] });
 		List<Point> list = new ArrayList<>();
 		list.addAll(sourceList);
 		Collections.shuffle(list, new Random());//防止出现循环情况
 		Collections.sort(list, (o1, o2) -> {
-			double dist1 = Math.pow(Math.abs(o1.x-p2.x), 2)+Math.pow(Math.abs(o1.y-p2.y), 2);
-			double dist2 = Math.pow(Math.abs(o2.x-p2.x), 2)+Math.pow(Math.abs(o2.y-p2.y), 2);
+			double dist1 = Math.pow(Math.abs(o1.getX()-p2.getX()), 2)+Math.pow(Math.abs(o1.getY()-p2.getY()), 2);
+			double dist2 = Math.pow(Math.abs(o2.getX()-p2.getX()), 2)+Math.pow(Math.abs(o2.getY()-p2.getY()), 2);
 			if(dist1>dist2){
 				return 1;
 			}else if(dist1==dist2){
@@ -59,8 +59,8 @@ public class BFS {
 	 * @return 返回4个点。顺序随机
 	 */
 	private static List<Point> get4Point(Point[][] array, Point p1) {
-		List<Point> sourceList = Arrays.asList(new Point[] { array[p1.row + 1][p1.col], array[p1.row - 1][p1.col],
-				array[p1.row][p1.col - 1], array[p1.row][p1.col + 1] });
+		List<Point> sourceList = Arrays.asList(new Point[] { array[p1.getRow() + 1][p1.getCol()], array[p1.getRow() - 1][p1.getCol()],
+				array[p1.getRow()][p1.getCol() - 1], array[p1.getRow()][p1.getCol() + 1] });
 		List<Point> list = new ArrayList<>();
 		list.addAll(sourceList);
 		Collections.shuffle(list, new Random());//防止出现循环情况
@@ -86,9 +86,10 @@ public class BFS {
 	public static Path searchShortPath(Point p1, Point p2, Point[][] mazeArray) {
 		Queue<Point> q = new LinkedList<>();// 没访问的点
 		Set<Point> s = new HashSet<>();// 已经访问的点
-		Point A =  p1.clone();
-		Point B =  p2.clone();
-		Point[][] array = mazeArray.clone();
+		Point A =  p1;
+		A.parent=null;
+		Point B =  p2;
+		Point[][] array = mazeArray;
 		q.add(A);// 初始化，第一个点
 		while (!q.isEmpty()) {
 			A = q.poll();
@@ -98,10 +99,10 @@ public class BFS {
 				l.add(B);
 				while (true) {
 					l.add(A);
-					if (A.parent == null) {
-						break;
-					} else {
+					if(A.parent!=null){
 						A=A.parent;
+					}else{
+						break;
 					}
 				}
 				Collections.reverse(l);

@@ -1,7 +1,7 @@
 package guojian.smart_snake;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,22 +13,22 @@ import java.util.List;
  */
 public class Snake implements Serializable,Cloneable{
 	private static final long serialVersionUID = 1211631935294087884L;
-	private List<Point> list = new ArrayList<>();//第一个元素为蛇尾
+	private List<Point> list = new LinkedList<>();//第一个元素为蛇尾
 	
 	/**
 	 * 蛇吃苹果
 	 * @param apple
 	 */
 	public void eatApple(Point apple){
-		list.get(list.size()-1).changeType(Type.Body);
-		list.add(new Point(apple.row, apple.col,Type.Head));
+		list.get(list.size()-1).setType(Type.Body);
+		list.add(new Point(apple.getRow(), apple.getCol(),Type.Head));
 	}
 	
 	public void move(Point point){
-		list.get(list.size()-1).changeType(Type.Body);
-		list.add(new Point(point.row, point.col,Type.Head));
+		list.get(list.size()-1).setType(Type.Body);
+		list.add(new Point(point.getRow(), point.getCol(),Type.Head));
 		list.remove(0);
-		list.get(0).changeType(Type.Tail);
+		list.get(0).setType(Type.Tail);
 	}
 
 	public Point getHead() {
