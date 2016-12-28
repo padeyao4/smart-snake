@@ -1,14 +1,10 @@
 package guojian.smart_snake;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.ResourceBundle;
 
 /**
  * <p>
@@ -23,45 +19,34 @@ import java.util.Random;
  * @email 1181819395@qq.com
  */
 public class Maze implements Serializable, Cloneable {
+	private static ResourceBundle bundle = ResourceBundle.getBundle("config");
+	public static final int COLSIZE = Integer.parseInt(bundle.getString("cols"));
+	public static final int ROWSIZE = Integer.parseInt(bundle.getString("rows"));
 	private static final long serialVersionUID = -4768606043555585626L;
-	public static final int COLSIZE = 10;
-	public static final int ROWSIZE = 10;
 
-	private Apple apple;// 苹果
-	private Point[][] array;//
-	private Snake snake;
+	Point apple;// 苹果
+	Point[][] array;//
+	Snake snake;
 
 	public Maze() {
 		array = new Point[ROWSIZE][COLSIZE];
-		// 初始化二维数组。
+	}
+
+	public Maze clone() {
+		Maze clone = new Maze();
+		clone.apple = this.apple.clone();
+		clone.snake = this.snake.clone();
+		clone.apple = this.apple.clone();
+
 		for (int row = 0; row < ROWSIZE; row++) {
 			for (int col = 0; col < COLSIZE; col++) {
-				array[row][col] = new Cell(row, col);
+				clone.array[row][col] = this.array[row][col].clone();
 			}
 		}
+		return clone;
 	}
 
-	public Object clone() {
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(bos);
-
-				oos.writeObject(this);
-
-				// 反序列化
-				ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-				ObjectInputStream ois = new ObjectInputStream(bis);
-
-				return ois.readObject();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return null;
-	}
-
-	public Apple getApple() {
+	public Point getApple() {
 		return apple;
 	}
 
@@ -81,7 +66,7 @@ public class Maze implements Serializable, Cloneable {
 		return snake.getHead();
 	}
 
-	public Tail getSnakeTail() {
+	public Point getSnakeTail() {
 		return snake.getTail();
 	}
 
@@ -89,25 +74,35 @@ public class Maze implements Serializable, Cloneable {
 	 * 初始化迷宫中的蛇
 	 */
 	public void initMazeSnake() {
-		Head head = new Head((int) (ROWSIZE / 2), (int) (COLSIZE / 2));
-		Body body = new Body(head.row + 1, head.col);
-		Tail tail = new Tail(body.row + 1, body.col);
+		Point head = new Point((int) (ROWSIZE / 2), (int) (COLSIZE / 2), Type.Head);
+		Point body = new Point(head.getRow() + 1, head.getCol(), Type.Body);
+		Point tail = new Point(body.getRow() + 1, body.getCol(), Type.Tail);
 		snake = new Snake();
-		snake.addHead(head);
-		snake.addBody(body);
-		snake.addTail(tail);
+		snake.add(tail);
+		snake.add(body);
+		snake.add(head);
 		snakeIntoMaze();
 	}
 
+	/**
+	 * 初始化墙
+	 */
 	public void initWalls() {
+		// 初始化二维数组。
+		for (int row = 0; row < ROWSIZE; row++) {
+			for (int col = 0; col < COLSIZE; col++) {
+				array[row][col] = new Point(row, col, Type.Cell);
+			}
+		}
+
 		for (int col = 0; col < Maze.COLSIZE; col++) {
-			setPoint(new Wall(0, col));
-			setPoint(new Wall(Maze.ROWSIZE - 1, col));
+			setPoint(new Point(0, col, Type.Wall));
+			setPoint(new Point(Maze.ROWSIZE - 1, col, Type.Wall));
 		}
 
 		for (int row = 1; row < Maze.ROWSIZE - 1; row++) {
-			setPoint(new Wall(row, 0));
-			setPoint(new Wall(row, Maze.COLSIZE - 1));
+			setPoint(new Point(row, 0, Type.Wall));
+			setPoint(new Point(row, Maze.COLSIZE - 1, Type.Wall));
 		}
 	}
 
@@ -115,11 +110,10 @@ public class Maze implements Serializable, Cloneable {
 	 * 清理迷宫中的蛇
 	 */
 	private void mazeClearSnake() {
-		setPoint(new Cell(snake.getHead().row, snake.getHead().col));
-		for (Point p : snake.getBodys()) {
-			setPoint(new Cell(p.row, p.col));
+		setPoint(new Point(snake.getHead().getRow(), snake.getHead().getCol(), Type.Cell));
+		for (Point p : snake.getList()) {
+			setPoint(new Point(p.getRow(), p.getCol(), Type.Cell));
 		}
-		setPoint(new Cell(snake.getTail().row, snake.getTail().col));
 	}
 
 	/**
@@ -132,49 +126,51 @@ public class Maze implements Serializable, Cloneable {
 		for (int row = 0; row < Maze.ROWSIZE; row++) {
 			for (int col = 0; col < Maze.COLSIZE; col++) {
 				Point point = array[row][col];
-				if (point.getValue() == Cell.value) {
+				if (point.getType() == Type.Cell) {
 					list.add(point);
 				}
 			}
 		}
-		Point point = list.get(new Random().nextInt(list.size()));
-		apple = new Apple(point.row, point.col);
-		setPoint(apple);
+		if(list.size()==0){
+			System.out.println("恭喜,屏幕吃满了");
+		}else{
+			Point point = list.get(new Random().nextInt(list.size()));
+			apple = new Point(point.getRow(), point.getCol(), Type.Apple);
+			setPoint(apple);
+		}
 	}
 
 	private void setPoint(Point p) {
-		array[p.row][p.col] = p;
+		array[p.getRow()][p.getCol()] = p;
 	}
 
 	/**
 	 * 将蛇画到迷宫中
 	 */
 	private void snakeIntoMaze() {
-		setPoint(snake.getHead());
-		for (Point p : snake.getBodys()) {
+		for (Point p : snake.getList()) {
 			setPoint(p);
 		}
-		setPoint(snake.getTail());
 	}
 
-	public Game snakeMove(Point point) {
+	public SnakeStatus snakeMove(Point point) {
 		if (point == null) {
-			return Game.over;
+			return SnakeStatus.die;
 		}
-		int value = point.getValue();
-		if (value == Body.value || value == Tail.value || value == Wall.value) {
-			return Game.over;
-		} else if (value == Apple.value) {
+		Type type = point.getType();
+		if (type == Type.Head || type == Type.Body || type == Type.Tail || type == Type.Wall) {
+			return SnakeStatus.die;
+		} else if (type == Type.Apple) {
 			mazeClearSnake();
 			snake.eatApple(point);
 			snakeIntoMaze();
-			return Game.eatApple;
-		} else if (value == Cell.value) {
+			return SnakeStatus.eat;
+		} else if (type == Type.Cell) {
 			mazeClearSnake();
 			snake.move(point);
 			snakeIntoMaze();
-			return Game.move;
+			return SnakeStatus.move;
 		}
-		return Game.exception;
+		return null;
 	}
 }

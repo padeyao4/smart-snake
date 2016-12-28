@@ -1,67 +1,59 @@
 package guojian.smart_snake;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-public class Snake implements Serializable{
+/**
+ * 蛇<br>
+ * list第一个元素为蛇尾，最后一个为蛇头
+ * @author guojian
+ * @date 2016年11月23日 下午11:41:30
+ * @email 1181819395@qq.com
+ */
+public class Snake implements Serializable,Cloneable{
 	private static final long serialVersionUID = 1211631935294087884L;
-	private List<Point> bodys = new ArrayList<>();//下标越小的元素离蛇尾越近。bodys[0]的元素为蛇的倒数第2节（蛇尾为倒数第一节）
-	private Head head;
-	private Tail tail;
+	private List<Point> list = new LinkedList<>();//第一个元素为蛇尾，最后一个元素为蛇头
 	
 	/**
 	 * 蛇吃苹果
 	 * @param apple
 	 */
 	public void eatApple(Point apple){
-		bodys.add(new Body(head.row, head.col));
-		head=new Head(apple.row, apple.col);
-	}
-
-	public void addHead(Head head) {
-		this.head=head;
+		list.get(list.size()-1).setType(Type.Body);
+		list.add(new Point(apple.getRow(), apple.getCol(),Type.Head));
 	}
 	
 	public void move(Point point){
-		bodys.add(new Body(head.row, head.col));
-		head=new Head(point.row,point.col);
-		Point p = bodys.get(0);
-		tail=new Tail(p.row,p.col);
-		bodys.remove(0);
+		list.get(list.size()-1).setType(Type.Body);
+		list.add(new Point(point.getRow(), point.getCol(),Type.Head));
+		list.remove(0);
+		list.get(0).setType(Type.Tail);
 	}
 
-	public void addBody(Body body) {
-		bodys.add(body);
+	public Point getHead() {
+		return list.get(list.size()-1);
 	}
 
-	public void addTail(Tail tail) {
-		this.tail=tail;
+	public Point getTail() {
+		return list.get(0);
 	}
 
-	public List<Point> getBodys() {
-		return bodys;
-	}
-
-	public void setBodys(List<Point> bodys) {
-		this.bodys = bodys;
-	}
-
-	public Head getHead() {
-		return head;
-	}
-
-	public void setHead(Head head) {
-		this.head = head;
-	}
-
-	public Tail getTail() {
-		return tail;
-	}
-
-	public void setTail(Tail tail) {
-		this.tail = tail;
+	public void add(Point p) {
+		list.add(p);
 	}
 	
+	public List<Point> getList(){
+		return list;
+	}
+	
+	@Override
+	protected Snake clone()   {
+		Snake s = new Snake();
+		list.forEach(p->{
+			s.list.add(p.clone());
+		});
+		return s;
+	}
 	
 }
