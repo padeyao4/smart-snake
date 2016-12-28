@@ -63,8 +63,8 @@ public class App extends Application {
 	private static int speed;// 速度
 
 	private static int WIDTH;// 游戏区域画面宽度
-	private static String userDir;
-	private static String saveGameOverImage;
+	private static String userDir;//保存的桌面文件夹的名称
+	private static String saveGameOverImage;//是否保存游戏结束图片。默认保存
 
 	private static void initApp() {
 		try {
@@ -100,7 +100,7 @@ public class App extends Application {
 
 	private String dir;// 每次运行时，图片保存的文件夹名称。为游戏运行时，系统时间
 
-	private BooleanProperty isAuto;// 默认不开启智能
+	private BooleanProperty openAI;// 默认不开启智能
 
 	private Maze maze;// 蛇，墙，苹果构成的迷宫
 
@@ -117,8 +117,8 @@ public class App extends Application {
 		dir = null;
 		maze = null;
 		nextPoint = null;
-		isAuto = new SimpleBooleanProperty(false);
-		isAuto.addListener((v, o, n) -> {
+		openAI = new SimpleBooleanProperty(false);
+		openAI.addListener((v, o, n) -> {
 			showHelpInfo();
 		});
 		status = null;
@@ -137,7 +137,7 @@ public class App extends Application {
 	 * @param timeLine
 	 */
 	private void action(Timeline timeLine) {
-		if (isAuto.get()) {// 智能运行
+		if (openAI.get()) {// 智能运行
 			simpleAI();
 		} else {// 手动运行
 			setPointByKey(currentKey);// ，保持上一次方向运动
@@ -203,11 +203,11 @@ public class App extends Application {
 					paintMzae();// 第一次显示
 					return;
 				} else if (key == KeyCode.ENTER) {
-					if (isAuto.get() == false) {
-						isAuto.set(true);
+					if (openAI.get() == false) {
+						openAI.set(true);
 						return;
 					} else {
-						isAuto.set(false);
+						openAI.set(false);
 						currentKey = getSnakeDirection()[1];
 						return;
 					}
@@ -233,11 +233,11 @@ public class App extends Application {
 				paintMzae();
 				return;
 			} else if (key == KeyCode.ENTER) {
-				if (isAuto.get() == false) {
-					isAuto.set(true);
+				if (openAI.get() == false) {
+					openAI.set(true);
 					return;
 				} else {
-					isAuto.set(false);
+					openAI.set(false);
 					currentKey = getSnakeDirection()[1];
 					return;
 				}
@@ -289,6 +289,11 @@ public class App extends Application {
 		maze.randomApple();// 在迷宫里随机生成一个苹果
 	}
 
+	/**
+	 * 相反的方向忽略
+	 * @param key
+	 * @return
+	 */
 	private KeyCode negativeIgnore(KeyCode key) {
 		KeyCode inverseKey = getSnakeDirection()[0];
 		if (key == inverseKey) {
@@ -518,7 +523,7 @@ public class App extends Application {
 		pen.fillText("ENTER: 开启/关闭智能", OFFSET, HEIGHT / 2 + 40);
 		pen.fillText("修改速度: 修改配置文件config.properties中的speed数据", OFFSET, HEIGHT / 2 - 40);
 
-		if (isAuto.getValue() == true) {
+		if (openAI.getValue() == true) {
 			pen.fillText("AI:开启", 0 + OFFSET, HEIGHT / 2 + 80);
 		} else {
 			pen.fillText("AI:关闭", 0 + OFFSET, HEIGHT / 2 + 80);
