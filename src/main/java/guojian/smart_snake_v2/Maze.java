@@ -19,12 +19,23 @@ public class Maze extends CommFunc implements Cloneable{
 	@Override
 	protected Maze clone() {
 		Maze m = new Maze();
-		m.palace = palace.clone();
+		for (int i = 0; i < Config.MAZE_ROWS; i++) {
+			for (int j = 0; j < Config.MAZE_COLS; j++) {
+				m.palace[i][j] = palace[i][j];
+			}
+		}
 		m.apple = apple;
 		for(int i:snake){
 			m.snake.add(i);
 		}
 		return m;
+	}
+	
+	public int getsPreStraightIndex(){
+		int head = getHead();
+		int body = snake.get(snake.size()-2);
+		int pre = head-body;
+		return head+pre;
 	}
 
 	public int getHead(){
@@ -133,8 +144,28 @@ public class Maze extends CommFunc implements Cloneable{
 		}
 	}
 
+	/**
+	 * 根据给的坐标向坐标移动一格
+	 * 并更新地图，更新蛇，更新苹果
+	 * @param nextIndex
+	 */
 	public void move(int nextIndex) {
-		// TODO Auto-generated method stub
-		
+		int[] coord = indexToCoord(nextIndex);
+		if(nextIndex==apple){//是苹果
+			snake.add(nextIndex);
+			palace[coord[0]][coord[1]]=Define.SNAKE;
+			RandonApple();
+			pressApple();
+		}else{
+			if(palace[coord[0]][coord[1]]==Define.BLANK){//是空白
+				snake.add(nextIndex);
+				int tail = snake.remove(0);
+				palace[coord[0]][coord[1]]=Define.SNAKE;
+				int[] coord_tail = indexToCoord(tail);
+				palace[coord_tail[0]][coord_tail[1]]=Define.BLANK;
+			}else{
+				apple=-1;
+			}
+		}
 	}
 }
