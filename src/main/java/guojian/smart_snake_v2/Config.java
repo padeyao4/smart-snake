@@ -4,5 +4,8 @@ public class Config {
 
 	public static final int MAZE_ROWS = 50;//必须大于9,否则蛇初始化到墙里了
 	public static final int MAZE_COLS = 50;
+	public static final int CELL_WIDTH = 0;
+	public static final int OFFSET = 0;
+	public static final int CELL_HEIGHT = 0;
 
 }

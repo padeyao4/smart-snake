@@ -37,7 +37,7 @@ public class Searcher extends CommFunc {
 		System.out.println((double)(System.currentTimeMillis()-time)/1);
 	}
 
-	public static List<Integer> findShortPath(byte[][] maze, int start, int end) throws InterruptedException {
+	public static List<Integer> findShortPath(byte[][] maze, int start, int end) {
 		List<Integer> list = new ArrayList<>();
 		Map<Integer, Integer> map = new HashMap<>();
 		Queue<Integer> q = new LinkedList<>();

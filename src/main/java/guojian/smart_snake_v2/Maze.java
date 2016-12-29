@@ -132,4 +132,9 @@ public class Maze extends CommFunc implements Cloneable{
 			palace[coord[0]][coord[1]]=Define.PATH;
 		}
 	}
+
+	public void move(int nextIndex) {
+		// TODO Auto-generated method stub
+		
+	}
 }
