@@ -1,176 +1,176 @@
 package guojian.smart_snake;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.ResourceBundle;
 
 /**
- * <p>
- * Title: 迷宫
- * </p>
- * <p>
- * Description:
- * </p>
- * 
  * @author guojian
- * @date 2016年11月18日 下午6:06:24
+ * @date 2016年12月29日 上午12:46:59
  * @email 1181819395@qq.com
  */
-public class Maze implements Serializable, Cloneable {
-	private static ResourceBundle bundle = ResourceBundle.getBundle("config");
-	public static final int COLSIZE = Integer.parseInt(bundle.getString("cols"));
-	public static final int ROWSIZE = Integer.parseInt(bundle.getString("rows"));
-	private static final long serialVersionUID = -4768606043555585626L;
-
-	Point apple;// 苹果
-	Point[][] array;//
-	Snake snake;
-
-	public Maze() {
-		array = new Point[ROWSIZE][COLSIZE];
-	}
-
-	public Maze clone() {
-		Maze clone = new Maze();
-		clone.apple = this.apple.clone();
-		clone.snake = this.snake.clone();
-		clone.apple = this.apple.clone();
-
-		for (int row = 0; row < ROWSIZE; row++) {
-			for (int col = 0; col < COLSIZE; col++) {
-				clone.array[row][col] = this.array[row][col].clone();
+public class Maze extends CommFunc implements Cloneable{
+	byte[][] palace;
+	int apple;
+	List<Integer> snake;
+	
+	@Override
+	protected Maze clone() {
+		Maze m = new Maze();
+		for (int i = 0; i < Config.MAZE_ROWS; i++) {
+			for (int j = 0; j < Config.MAZE_COLS; j++) {
+				m.palace[i][j] = palace[i][j];
 			}
 		}
-		return clone;
+		m.apple = apple;
+		for(int i:snake){
+			m.snake.add(i);
+		}
+		return m;
+	}
+	
+	public int getsPreStraightIndex(){
+		int head = getHead();
+		int body = snake.get(snake.size()-2);
+		int pre = head-body;
+		return head+pre;
 	}
 
-	public Point getApple() {
+	public int getHead(){
+		return snake.get(snake.size()-1);
+	}
+	
+	public int getSecondBody(){
+		return snake.get(snake.size()-2);
+	}
+	
+	public int getTail(){
+		return snake.get(0);
+	}
+
+	public Maze() {
+		palace = new byte[Config.MAZE_ROWS][Config.MAZE_COLS];
+		snake = new LinkedList<>();
+		apple = -1;
+	}
+
+	public void initPalace() {
+		for (int i = 0; i < Config.MAZE_ROWS; i++) {
+			for (int j = 0; j < Config.MAZE_COLS; j++) {
+				palace[i][j] = Define.BLANK;
+			}
+		}
+
+		for (int i = 0; i < Config.MAZE_COLS; i++) {
+			palace[0][i] = Define.WALL;
+			palace[Config.MAZE_ROWS - 1][i] = Define.WALL;
+		}
+
+		for (int i = 0; i < Config.MAZE_ROWS; i++) {
+			palace[i][0] = Define.WALL;
+			palace[i][Config.MAZE_COLS - 1] = Define.WALL;
+		}
+	}
+
+	public void initSnake() {
+		snake.clear();
+		int center_col = Config.MAZE_COLS / 2;
+		int center_row = Config.MAZE_ROWS / 2;
+		for (int i = 1; i < 4; i++) {
+			snake.add(coordToIndex(center_col, center_row + i));
+		}
+		Collections.reverse(snake);
+	}
+	
+	public int getApple(){
 		return apple;
 	}
 
-	public Point[][] getArray() {
-		return array;
-	}
-
-	public Point getArrayPoint(int row, int col) {
-		return array[row][col];
-	}
-
-	public Snake getSnake() {
-		return snake;
-	}
-
-	public Point getSnakeHead() {
-		return snake.getHead();
-	}
-
-	public Point getSnakeTail() {
-		return snake.getTail();
-	}
-
-	/**
-	 * 初始化迷宫中的蛇
-	 */
-	public void initMazeSnake() {
-		Point head = new Point((int) (ROWSIZE / 2), (int) (COLSIZE / 2), Type.Head);
-		Point body = new Point(head.getRow() + 1, head.getCol(), Type.Body);
-		Point tail = new Point(body.getRow() + 1, body.getCol(), Type.Tail);
-		snake = new Snake();
-		snake.add(tail);
-		snake.add(body);
-		snake.add(head);
-		snakeIntoMaze();
-	}
-
-	/**
-	 * 初始化墙
-	 */
-	public void initWalls() {
-		// 初始化二维数组。
-		for (int row = 0; row < ROWSIZE; row++) {
-			for (int col = 0; col < COLSIZE; col++) {
-				array[row][col] = new Point(row, col, Type.Cell);
-			}
-		}
-
-		for (int col = 0; col < Maze.COLSIZE; col++) {
-			setPoint(new Point(0, col, Type.Wall));
-			setPoint(new Point(Maze.ROWSIZE - 1, col, Type.Wall));
-		}
-
-		for (int row = 1; row < Maze.ROWSIZE - 1; row++) {
-			setPoint(new Point(row, 0, Type.Wall));
-			setPoint(new Point(row, Maze.COLSIZE - 1, Type.Wall));
-		}
-	}
-
-	/**
-	 * 清理迷宫中的蛇
-	 */
-	private void mazeClearSnake() {
-		setPoint(new Point(snake.getHead().getRow(), snake.getHead().getCol(), Type.Cell));
-		for (Point p : snake.getList()) {
-			setPoint(new Point(p.getRow(), p.getCol(), Type.Cell));
-		}
-	}
-
-	/**
-	 * 在二维数组中随机生成一个苹果
-	 * 
-	 * @return apple
-	 */
-	public void randomApple() {
-		List<Point> list = new ArrayList<>();
-		for (int row = 0; row < Maze.ROWSIZE; row++) {
-			for (int col = 0; col < Maze.COLSIZE; col++) {
-				Point point = array[row][col];
-				if (point.getType() == Type.Cell) {
-					list.add(point);
+	public void RandonApple() {
+		List<Integer> list = new ArrayList<>();
+		for (int i = 0; i < Config.MAZE_ROWS; i++) {
+			for (int j = 0; j < Config.MAZE_COLS; j++) {
+				if (palace[i][j] == Define.BLANK) {
+					list.add(coordToIndex(j, i));
 				}
 			}
 		}
-		if(list.size()==0){
-			System.out.println("恭喜,屏幕吃满了");
+		if(list.isEmpty()){//吃满屏幕的情况
+			apple =  -1;
 		}else{
-			Point point = list.get(new Random().nextInt(list.size()));
-			apple = new Point(point.getRow(), point.getCol(), Type.Apple);
-			setPoint(apple);
+			apple =  list.get(new Random().nextInt(list.size()));
 		}
 	}
 
-	private void setPoint(Point p) {
-		array[p.getRow()][p.getCol()] = p;
+	public void pressSnakeAndPalace() {
+		for (int i : snake) {
+			int[] coord = indexToCoord(i);
+			palace[coord[0]][coord[1]] = Define.SNAKE;
+		}
+	}
+
+	public void pressApple()  {
+		if(apple==-1){
+			return;
+		}
+		int[] coord = indexToCoord(apple);
+		palace[coord[0]][coord[1]] = Define.APPLE;
+	}
+
+	public void log() {
+		for (int i = 0; i < Config.MAZE_ROWS; i++) {
+			for (int j = 0; j < Config.MAZE_COLS; j++) {
+				System.out.print(palace[i][j]);
+				System.out.print(" ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
+
+	public static void main(String[] args) {
+		Maze maze = new Maze();
+		maze.initPalace();
+		maze.log();
+		maze.initSnake();
+		maze.pressSnakeAndPalace();
+		maze.log();
+		maze.RandonApple();
+		maze.pressApple();
+		maze.log();
+	}
+
+	public void pressPaths(List<Integer> paths) {
+		for(int i:paths){
+			int[] coord = indexToCoord(i);
+			palace[coord[0]][coord[1]]=Define.PATH;
+		}
 	}
 
 	/**
-	 * 将蛇画到迷宫中
+	 * 根据给的坐标向坐标移动一格
+	 * 并更新地图，更新蛇，更新苹果
+	 * @param nextIndex
 	 */
-	private void snakeIntoMaze() {
-		for (Point p : snake.getList()) {
-			setPoint(p);
+	public void move(int nextIndex) {
+		int[] coord = indexToCoord(nextIndex);
+		if(nextIndex==apple){//是苹果
+			snake.add(nextIndex);
+			palace[coord[0]][coord[1]]=Define.SNAKE;
+			RandonApple();
+			pressApple();
+		}else{
+			if(palace[coord[0]][coord[1]]==Define.BLANK){//是空白
+				snake.add(nextIndex);
+				int tail = snake.remove(0);
+				palace[coord[0]][coord[1]]=Define.SNAKE;
+				int[] coord_tail = indexToCoord(tail);
+				palace[coord_tail[0]][coord_tail[1]]=Define.BLANK;
+			}else{
+				apple=-1;
+			}
 		}
-	}
-
-	public SnakeStatus snakeMove(Point point) {
-		if (point == null) {
-			return SnakeStatus.die;
-		}
-		Type type = point.getType();
-		if (type == Type.Head || type == Type.Body || type == Type.Tail || type == Type.Wall) {
-			return SnakeStatus.die;
-		} else if (type == Type.Apple) {
-			mazeClearSnake();
-			snake.eatApple(point);
-			snakeIntoMaze();
-			return SnakeStatus.eat;
-		} else if (type == Type.Cell) {
-			mazeClearSnake();
-			snake.move(point);
-			snakeIntoMaze();
-			return SnakeStatus.move;
-		}
-		return null;
 	}
 }
