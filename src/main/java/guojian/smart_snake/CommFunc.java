@@ -1,4 +1,4 @@
-package guojian.smart_snake_v2;
+package guojian.smart_snake;
 
 public class CommFunc {
 
