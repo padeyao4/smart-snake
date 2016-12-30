@@ -26,21 +26,23 @@ public class Searcher extends CommFunc {
 			m.pressSnakeAndPalace();
 			m.RandonApple();
 			m.pressApple();
-			 m.log();
-//			List<Integer> paths = findShortPath(m.palace, m.getHead(), m.apple);
+			m.log();
+			// List<Integer> paths = findShortPath(m.palace, m.getHead(),
+			// m.apple);
 			List<Integer> paths = findShortPath(m.palace, m.getHead(), m.getTail());
 			// System.out.println("head:"+m.getHead());
 			// System.out.println("apple:"+m.apple);
-			 System.out.println("paths:"+paths.toString());
-			 Maze newm = m.clone();
-			 newm.pressPaths(paths);
-			 newm.log();
+			System.out.println("paths:" + paths.toString());
+			Maze newm = m.clone();
+			newm.pressPaths(paths);
+			newm.log();
 		}
-		System.out.println((double)(System.currentTimeMillis()-time)/1);
+		System.out.println((double) (System.currentTimeMillis() - time) / 1);
 	}
 
 	/**
 	 * 搜索最短路径
+	 * 
 	 * @param maze
 	 * @param start
 	 * @param end
@@ -56,7 +58,7 @@ public class Searcher extends CommFunc {
 		s.add(start);
 		q.add(start);
 		while (true) {
-			if(q.isEmpty()){
+			if (q.isEmpty()) {
 				return list;
 			}
 			start = q.poll();
@@ -111,6 +113,7 @@ public class Searcher extends CommFunc {
 
 	/**
 	 * 找最远距离
+	 * 
 	 * @param palace
 	 * @param head
 	 * @param tail
@@ -118,44 +121,40 @@ public class Searcher extends CommFunc {
 	 */
 	public static List<Integer> findLongPath(byte[][] palace, int head, int tail) {
 		List<Integer> list = getAroundIndexs(head, palace);
-		if(list.size()==0){
-			return Arrays.asList(head,0);
+		if (list.size() == 0) {
+			return Arrays.asList(head, 0);
 		}
 		List<List<Integer>> paths = new ArrayList<>();
-		for(int i:list){
+		for (int i : list) {
 			paths.add(findShortPath(palace, i, tail));
 		}
-		List<Integer> longone = paths.stream().max(Comparator.comparingInt(e->e.size())).get();
-		longone.add(0,head);
+		List<Integer> longone = paths.stream().max(Comparator.comparingInt(e -> e.size())).get();
+		longone.add(0, head);
 		return longone;
 	}
-	
+
 	private static List<Integer> getAroundIndexs(int start, byte[][] maze) {
 		List<Integer> list = Arrays.asList(start + 1, start - 1, start - Config.MAZE_COLS, start + Config.MAZE_COLS);
 		List<Integer> fitList = list.stream().filter(idx -> {
 			int[] cooord = indexToCoord(idx);
 			byte type = maze[cooord[0]][cooord[1]];
-			boolean fit = type != Define.WALL && type != Define.SNAKE ;
-			if (fit) {
-				return true;
-			} else {
-				return false;
-			}
+			boolean fit = type != Define.WALL && type != Define.SNAKE;
+			return fit;
 		}).collect(Collectors.toList());
 		return fitList;
 	}
 
 	public static List<Integer> findLongPathAndshuffle(byte[][] palace, int head, int tail) {
 		List<Integer> list = getAroundIndexs(head, palace);
-		if(list.size()==0){
-			return Arrays.asList(head,0);
+		if (list.size() == 0) {
+			return Arrays.asList(head, 0);
 		}
 		List<List<Integer>> paths = new ArrayList<>();
-		for(int i:list){
+		for (int i : list) {
 			paths.add(findShortPathAndShuffle(palace, i, tail));
 		}
-		List<Integer> longone = paths.stream().max(Comparator.comparingInt(e->e.size())).get();
-		longone.add(0,head);
+		List<Integer> longone = paths.stream().max(Comparator.comparingInt(e -> e.size())).get();
+		longone.add(0, head);
 		return longone;
 	}
 
@@ -169,7 +168,7 @@ public class Searcher extends CommFunc {
 		s.add(start);
 		q.add(start);
 		while (true) {
-			if(q.isEmpty()){
+			if (q.isEmpty()) {
 				return list;
 			}
 			start = q.poll();
@@ -199,10 +198,8 @@ public class Searcher extends CommFunc {
 			if (fit) {
 				map.put(idx, start);
 				s.add(idx);
-				return true;
-			} else {
-				return false;
 			}
+			return fit;
 		}).collect(Collectors.toList());
 		Collections.shuffle(fitList);
 		return fitList;

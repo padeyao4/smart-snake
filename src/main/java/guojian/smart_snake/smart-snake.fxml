@@ -14,7 +14,7 @@
       <SplitPane dividerPositions="0.5">
          <items>
             <Canvas fx:id="canvas" height="400.0" width="400.0" />
-            <VBox prefHeight="400.0" prefWidth="165.0">
+            <VBox prefHeight="400.0" prefWidth="149.0">
                <children>
                   <GridPane>
                     <columnConstraints>
@@ -49,6 +49,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <Label text="开始/暂停:" />
@@ -59,13 +60,15 @@
                         <Label text="F2" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label text="方向控制:" GridPane.rowIndex="3" />
                         <Label text="上下左右" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label prefHeight="15.0" prefWidth="60.0" text="BGM" GridPane.rowIndex="4" />
+                        <Label text="空格" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                      </children>
                      <VBox.margin>
                         <Insets left="5.0" />
                      </VBox.margin>
                   </GridPane>
                   <Label prefHeight="15.0" prefWidth="166.0" text="------------------------------" />
-                  <Canvas fx:id="cvs_show" height="134.0" width="165.0" />
+                  <Canvas fx:id="cvs_show" height="104.0" width="165.0" />
                </children>
             </VBox>
          </items>
