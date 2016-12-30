@@ -4,6 +4,7 @@ import javafx.animation.Animation.Status;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
@@ -36,6 +37,9 @@ public class App extends Application {
 			break;
 		case RIGHT:
 			app.reverseDireAndKeepDire(e.getCode());
+			break;
+		case SPACE:
+			app.music();
 			break;
 		case ESCAPE:
 			System.exit(0);
@@ -84,6 +88,7 @@ public class App extends Application {
 		primaryStage.sizeToScene();
 		primaryStage.setTitle("smart-snake");
 		primaryStage.setResizable(false);
+		primaryStage.getIcons().add(new Image(this.getClass().getResourceAsStream("me.jpg")));
 		primaryStage.show();
 		scene.setOnKeyPressed(e -> keyListener(e));
 	}

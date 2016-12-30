@@ -10,6 +10,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -85,38 +88,53 @@ public class Controller {
 	public Label ai_label;
 	@FXML
 	private Canvas canvas;
-	@FXML
-	private Pane pane;
-	@FXML
-	public Label status_label;
+	public int currIdx;
 	@FXML
 	private Canvas cvs_show;
-    @FXML
-    private Label speed_label;
+	@FXML
+	private Pane pane;
+	private AI simpleAI;
+
+	@FXML
+	private Label speed_label;
+
+	@FXML
+	public Label status_label;
 
 	public Timeline timeLine;// 定时，动画
 
-	public int currIdx;
-
 	/**
-	 * 相反的方向忽略
-	 * 
-	 * @param key,up
-	 *            down left right
-	 * @return
+	 * 固定时间执行的动作
 	 */
-	public void reverseDireAndKeepDire(KeyCode key) {
-		KeyCode inverseKey = getSnakeReverseDirection();
-		System.out.println(key);
-		System.out.println(inverseKey);
-		if (key.equals(inverseKey)) {
-			currIdx = getSnakeDirectionIdx();
-			
+	private void action() {
+		if (ai) {
+			int nextIndex = simpleAI.run(maze);
+			maze.move(nextIndex);
 		} else {
-			currIdx = directionConvToOffsetIdx(key);
-			
-			
+			int nextIndex = maze.getHead() + currIdx;
+			maze.move(nextIndex);
 		}
+
+		if (gameOver()) {// 游戏结束
+			timeLine.stop();
+			status_label.setText("STOPED");
+			showGameOver();
+		} else {
+			drawMaze(maze.palace, maze.snake);
+		}
+
+		if (Config.SAVE) {
+			Saver.storeImage(canvas);
+		}
+	}
+
+	public void aiClear() {
+		simpleAI.clear();
+	}
+
+	private void clearGameOver() {
+		cvs_show.getGraphicsContext2D().setFill(Color.WHITE);
+		cvs_show.getGraphicsContext2D().fillRect(0, 0, cvs_show.getWidth(), cvs_show.getHeight());
 	}
 
 	/**
@@ -141,6 +159,18 @@ public class Controller {
 	}
 
 	/**
+	 * 蛇的运动方向的 偏移量
+	 * 
+	 * @return
+	 */
+	private int getSnakeDirectionIdx() {
+		int head = maze.getHead();
+		int body = maze.getSecondBody();
+		int key = head - body;
+		return key;
+	}
+
+	/**
 	 * 
 	 * @return 蛇运动的反方向
 	 */
@@ -158,78 +188,21 @@ public class Controller {
 		}
 		return null;
 	}
+	
+	private MediaPlayer mediaPlayer;
 
-	/**
-	 * 蛇的运动方向的 偏移量
-	 * 
-	 * @return
-	 */
-	private int getSnakeDirectionIdx() {
-		int head = maze.getHead();
-		int body = maze.getSecondBody();
-		int key = head - body;
-		return key;
-	}
-
-	/**
-	 * 固定时间执行的动作
-	 */
-	private void action() {
-		if (ai) {
-			int nextIndex = simpleAI.run(maze);
-			maze.move(nextIndex);
-		} else {
-			int nextIndex = maze.getHead() + currIdx;
-			maze.move(nextIndex);
-		}
-
-		if (gameOver()) {// 游戏结束
-			timeLine.stop();
-			status_label.setText("STOPED");
-			showGameOver();
-		} else {
-			drawMaze(maze.palace, maze.snake);
-		}
-		
-		if(Config.SAVE){
-			Saver.storeImage(canvas);
-		}
-	}
-
-	private void showGameOver() {
-		cvs_show.getGraphicsContext2D().setFont(new Font(15));
-		cvs_show.getGraphicsContext2D().setFill(Color.BLACK);
-		cvs_show.getGraphicsContext2D().fillText("GAME OVER", 30, 65);
-	}
-
-	private AI simpleAI;
 	@FXML
 	void initialize() {
+		Media media1 = new Media(this.getClass().getResource("WhereIstheLove.mp3").toString());  
+		mediaPlayer = new MediaPlayer(media1);
+		mediaPlayer.setCycleCount(99);
+		mediaPlayer.setAutoPlay(true);
 		ai = true;
 		ai_label.setText("开启");
-		speed_label.setText("每秒"+(1000.0d/Config.SPEED)+"步");
+		speed_label.setText("每秒" + (1000.0d / Config.SPEED) + "步");
 		pen = canvas.getGraphicsContext2D();
 		simpleAI = new SimpleAI();
 		restartGame();
-	}
-
-	
-	public void restartGame() {
-		if (timeLine != null) {
-			timeLine.stop();
-			status_label.setText("STOPED");
-		}
-		initMaze();
-		currIdx = getSnakeDirectionIdx();
-		initTimeLine();
-		drawMaze(maze.palace, maze.snake);
-		simpleAI.clear();
-		clearGameOver();
-	}
-
-	private void clearGameOver() {
-		cvs_show.getGraphicsContext2D().setFill(Color.WHITE);
-		cvs_show.getGraphicsContext2D().fillRect(0, 0, cvs_show.getWidth(), cvs_show.getHeight());
 	}
 
 	/**
@@ -251,8 +224,49 @@ public class Controller {
 		status_label.setText("stoped");
 	}
 
+	public void resetIdx() {
+		currIdx = getSnakeDirectionIdx();
+	}
+
+	public void restartGame() {
+		if (timeLine != null) {
+			timeLine.stop();
+			status_label.setText("STOPED");
+		}
+		initMaze();
+		currIdx = getSnakeDirectionIdx();
+		initTimeLine();
+		drawMaze(maze.palace, maze.snake);
+		simpleAI.clear();
+		clearGameOver();
+	}
+
+	/**
+	 * 相反的方向忽略
+	 * 
+	 * @param key,up
+	 *            down left right
+	 * @return
+	 */
+	public void reverseDireAndKeepDire(KeyCode key) {
+		KeyCode inverseKey = getSnakeReverseDirection();
+		if (key.equals(inverseKey)) {
+			currIdx = getSnakeDirectionIdx();
+
+		} else {
+			currIdx = directionConvToOffsetIdx(key);
+
+		}
+	}
+
 	public void setAi_label(Label ai_label) {
 		this.ai_label = ai_label;
+	}
+
+	private void showGameOver() {
+		cvs_show.getGraphicsContext2D().setFont(new Font(15));
+		cvs_show.getGraphicsContext2D().setFill(Color.BLACK);
+		cvs_show.getGraphicsContext2D().fillText("GAME OVER", 30, 65);
 	}
 
 	/**
@@ -271,12 +285,13 @@ public class Controller {
 		drawMaze(newm.palace, newm.snake);
 	}
 
-	public void resetIdx() {
-		currIdx = getSnakeDirectionIdx();
-	}
-
-	public void aiClear() {
-		simpleAI.clear();
+	public void music() {
+		Status s  = mediaPlayer.getStatus();
+		if(s.equals(Status.PAUSED)){
+			mediaPlayer.play();
+		}else{
+			mediaPlayer.pause();
+		}
 	}
 
 }
