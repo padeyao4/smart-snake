@@ -8,6 +8,9 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
+/**
+ * 这是入口
+ */
 public class App extends Application {
 	public static void main(String[] args) {
 		launch(args);
@@ -81,14 +84,14 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		FXMLLoader loader = new FXMLLoader(Controller.class.getResource("smart-snake.fxml"));
+		FXMLLoader loader = new FXMLLoader(Controller.class.getResource("/smart-snake.fxml"));
 		Scene scene = new Scene(loader.load());
 		app = loader.getController();
 		primaryStage.setScene(scene);
 		primaryStage.sizeToScene();
 		primaryStage.setTitle("smart-snake");
 		primaryStage.setResizable(false);
-		primaryStage.getIcons().add(new Image(this.getClass().getResourceAsStream("me.jpg")));
+		primaryStage.getIcons().add(new Image(this.getClass().getResourceAsStream("/me.jpg")));
 		primaryStage.show();
 		scene.setOnKeyPressed(e -> keyListener(e));
 	}

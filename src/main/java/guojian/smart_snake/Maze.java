@@ -12,8 +12,8 @@ import java.util.Random;
  * @email 1181819395@qq.com
  */
 public class Maze extends CommFunc implements Cloneable{
-	byte[][] palace;
-	int apple;
+	byte[][] palace;//
+	int apple;//随机生成的苹果的位置
 	List<Integer> snake;
 	
 	@Override

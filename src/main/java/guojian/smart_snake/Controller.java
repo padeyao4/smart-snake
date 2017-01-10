@@ -193,7 +193,7 @@ public class Controller {
 
 	@FXML
 	void initialize() {
-		Media media1 = new Media(this.getClass().getResource("WhereIstheLove.mp3").toString());  
+		Media media1 = new Media(this.getClass().getResource("/WhereIstheLove.mp3").toString());
 		mediaPlayer = new MediaPlayer(media1);
 		mediaPlayer.setCycleCount(99);
 		mediaPlayer.setAutoPlay(true);
@@ -221,7 +221,7 @@ public class Controller {
 		timeLine = new Timeline();// 定时，动画
 		timeLine.setCycleCount(Timeline.INDEFINITE);// 设置循环
 		timeLine.getKeyFrames().add(new KeyFrame(Duration.millis(speed), e -> action()));
-		status_label.setText("stoped");
+		status_label.setText("STOPED");
 	}
 
 	public void resetIdx() {
