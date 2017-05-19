@@ -82,8 +82,8 @@ public class Searcher extends CommFunc {
 			Map<Integer, Integer> map) {
 		List<Integer> list = Arrays.asList(start + 1, start - 1, start - Config.MAZE_COLS, start + Config.MAZE_COLS);
 		List<Integer> fitList = list.stream().filter(idx -> {
-			int[] cooord = indexToCoord(idx);
-			byte type = maze[cooord[0]][cooord[1]];
+			int[] coord = indexToCoord(idx);
+			byte type = maze[coord[0]][coord[1]];
 			boolean fit = type != Define.WALL && type != Define.SNAKE && !s.contains(idx);
 			if (fit) {
 				map.put(idx, start);
@@ -136,10 +136,9 @@ public class Searcher extends CommFunc {
 	private static List<Integer> getAroundIndexs(int start, byte[][] maze) {
 		List<Integer> list = Arrays.asList(start + 1, start - 1, start - Config.MAZE_COLS, start + Config.MAZE_COLS);
 		List<Integer> fitList = list.stream().filter(idx -> {
-			int[] cooord = indexToCoord(idx);
-			byte type = maze[cooord[0]][cooord[1]];
-			boolean fit = type != Define.WALL && type != Define.SNAKE;
-			return fit;
+			int[] coord = indexToCoord(idx);
+			byte type = maze[coord[0]][coord[1]];
+			return type != Define.WALL && type != Define.SNAKE;
 		}).collect(Collectors.toList());
 		return fitList;
 	}
