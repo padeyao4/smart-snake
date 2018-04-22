@@ -22,7 +22,7 @@ public class View extends Stage {
         setScene(new Scene(root));
         setTitle(new RamdonTitle().getTitle());
         setHeight(Double.parseDouble(u.get("window.height", "300d")));
-        setWidth(Double.parseDouble(u.get("widonw.width", "400d")));
+        setWidth(Double.parseDouble(u.get("window.width", "400d")));
         getIcons().add(new Image(this.getClass().getResourceAsStream("/me.jpg")));
         setResizable(false);
         show();//显示出来啦

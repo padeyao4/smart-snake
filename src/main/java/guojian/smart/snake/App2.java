@@ -16,7 +16,7 @@ public class App2 extends Application {
 		launch(args);
 	}
 
-	private Controller app;
+	private Controller2 app;
 
 	private void keyListener(KeyEvent e) {
 		switch (e.getCode()) {
@@ -84,7 +84,7 @@ public class App2 extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		FXMLLoader loader = new FXMLLoader(Controller.class.getResource("/smart-snake.fxml"));
+		FXMLLoader loader = new FXMLLoader(Controller2.class.getResource("/smart-snake.fxml"));
 		Scene scene = new Scene(loader.load());
 		app = loader.getController();
 		primaryStage.setScene(scene);
