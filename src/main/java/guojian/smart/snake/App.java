@@ -7,24 +7,21 @@ import javafx.stage.Stage;
 
 
 public class App extends Application{
-    int count =10;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        View view = new View();
         Model model = new Model();
+        View view = new View(model);
         Controller controller = new Controller(model);
 
+        // 默认每秒刷新60次
         new AnimationTimer() {
 
             // now显示的是当前系统时间
             @Override
             public void handle(long now) {
-                if(count-- > 0){
-                    System.out.println(now);
-                }
                 model.update();
-                view.update();
+                view.render();
             }
         }.start();
 
