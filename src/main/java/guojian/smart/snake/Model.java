@@ -20,7 +20,7 @@ public class Model {
      * 贪食蛇画面中的地图
      * world为view中渲染的数据来源
      */
-    public int[][] world;
+    public  int[][] world;
     private int[][] snake;
     private int[][] walls;
     /**
@@ -28,6 +28,7 @@ public class Model {
      * [row,col]
      */
     private int[] apples;
+    private int[] head;
     /**
      * 地图宽
      */
@@ -71,7 +72,7 @@ public class Model {
 
     public Model() {
         running = false;
-        direction = Direction.DOWN;
+        direction = Direction.UP;
         world = initIntArray(ROWS, COLS, BLANK);
         initSnake();
         initWalls();
@@ -134,6 +135,9 @@ public class Model {
         snake = initIntArray(ROWS, COLS, BLANK);
         snake[ROWS / 2][COLS / 2] = TAIL;
         snake[(ROWS / 2) - 1][COLS / 2] = count;
+        head = new int[2];
+        head[0] = ROWS / 2 - 1;
+        head[1] = COLS / 2;
     }
 
 
@@ -155,16 +159,79 @@ public class Model {
         running = !running;
     }
 
+
     /**
      * 更新world数据
      */
     public void update() {
         if (running) {
             System.out.println(new Date());
+            int[] tmp_head = new int[]{head[0], head[1]};
+            int[][] tmp_world = initIntArray(ROWS, COLS, BLANK);
+            updateWorld(tmp_world, snake, walls, apples);
             switch (direction) {
                 case RIGHT:
+                    tmp_head[1]++;
+                    break;
+                case LEFT:
+                    tmp_head[1]--;
+                    break;
+                case DOWN:
+                    tmp_head[0]++;
+                    break;
+                case UP:
+                    tmp_head[0]--;
+                    break;
+            }
+            int type = tmp_world[tmp_head[0]][tmp_head[1]];
+            switch (type) {
+                case BLANK:
+                    snake_move(snake, tmp_head, head);
+                    head[0] = tmp_head[0];
+                    head[1] = tmp_head[1];
+                    updateWorld(world, snake, walls, apples);
+                    break;
+                case WALL:
+                    gameOver();
+                    System.out.println("Wall");
+                    break;
+                case BODY:
+                    gameOver();
+                    System.out.println("body");
+                    break;
+                case APPLE:
+                    eat_apple(snake, tmp_head, head);
+                    count = snake[tmp_head[0]][tmp_head[1]];
+                    head[0] = tmp_head[0];
+                    head[1] = tmp_head[1];
+                    apples = randomApple(snake, walls);
+                    updateWorld(world, snake, walls, apples);
+                    break;
 
             }
+
         }
     }
+
+    private void eat_apple(int[][] snake, int[] tmp_head, int[] head) {
+        snake[tmp_head[0]][tmp_head[1]] = snake[head[0]][head[1]]++;
+    }
+
+    private void gameOver() {
+        running = false;
+        System.out.println("gameover");
+    }
+
+    private void snake_move(int[][] snake, int[] tmp_head, int[] head) {
+        int tmp = snake[head[0]][head[1]];
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (snake[row][col] != BLANK) {
+                    snake[row][col]--;
+                }
+            }
+        }
+        snake[head[0]][head[1]] = tmp;
+    }
+
 }

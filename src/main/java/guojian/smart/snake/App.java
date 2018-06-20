@@ -28,13 +28,12 @@ public class App extends Application {
             // now显示的是当前系统时间
             @Override
             public void handle(long now) {
-
-                view.render();
                 if (now - tmptime < 1000_000_000) {
                     return;
                 } else {
                     tmptime = now;
                     model.update();
+                    view.render();
                 }
 
             }
