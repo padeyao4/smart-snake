@@ -15,8 +15,6 @@ import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
 
-import guojian.smart.snake.Model.Cell;
-
 
 /**
  * 视图，负责画面显示
@@ -44,7 +42,7 @@ public class View extends Stage {
     /**
      * 方块和颜色对应
      */
-    Map<Model.Cell, Color> colorMap;
+    Map<Integer, Color> colorMap;
     /**
      * 方格大小
      * 设置为正方形窗口边 除以 正方形地图边的值，地图刚好填充满窗口
@@ -56,13 +54,7 @@ public class View extends Stage {
         canvas = new Canvas();
         pen = canvas.getGraphicsContext2D();
 
-        colorMap = new HashMap<>();
-        colorMap.put(Cell.header, Color.BURLYWOOD);
-        colorMap.put(Cell.body, Color.BURLYWOOD);
-        colorMap.put(Cell.tail, Color.BURLYWOOD);
-        colorMap.put(Cell.apple, Color.GREEN);
-        colorMap.put(Cell.blank, Color.BLACK);
-        colorMap.put(Cell.wall, Color.DARKCYAN);
+        initMap();
 
         Group root = new Group();
         root.getChildren().add(canvas);
@@ -77,18 +69,26 @@ public class View extends Stage {
         show();//显示
     }
 
+    private void initMap() {
+        colorMap = new HashMap<>();
+        colorMap.put(Model.BODY, Color.BURLYWOOD);
+        colorMap.put(Model.APPLE, Color.GREEN);
+        colorMap.put(Model.BLANK, Color.BLACK);
+        colorMap.put(Model.WALL, Color.DARKCYAN);
+    }
+
     /**
      * 使用白色 清理画布
      */
-    public void clearCanvas() {
+    protected void clearCanvas() {
         pen.setFill(Color.WHITE);
         pen.fillRect(0, 0, width, height);
     }
 
 
     protected void draw() {
-        for (int row = 0; row < m.rows; row++) {
-            for (int col = 0; col < m.cols; col++) {
+        for (int row = 0; row < m.ROWS; row++) {
+            for (int col = 0; col < m.COLS; col++) {
                 pen.setFill(colorMap.get(m.world[row][col]));
                 pen.fillRect(col * cellSize, row * cellSize, cellSize - 1, cellSize - 1);
             }

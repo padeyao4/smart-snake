@@ -13,6 +13,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.ujmp</groupId>
+            <artifactId>ujmp-core</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -33,7 +40,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>guojian.smart.snake.App2</mainClass>
+                            <mainClass>guojian.smart.snake.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
