@@ -6,6 +6,7 @@ package guojian.smart.snake;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public class Controller implements EventHandler{
@@ -18,7 +19,10 @@ public class Controller implements EventHandler{
     @Override
     public void handle(Event event) {
         if(event.getEventType().equals(KeyEvent.KEY_PRESSED)){
-            System.out.println("key pressed!");
+            if(((KeyEvent)event).getCode()== KeyCode.ENTER){
+                System.out.println("111");
+            }
+//            m.changeState();
         }
     }
 }

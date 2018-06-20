@@ -9,10 +9,12 @@ import javafx.application.Application;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
-public class App extends Application{
+
+public class App extends Application {
+    private long tmptime = 0;
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         // 数据模型
         Model model = new Model();
         // 用来界面显示
@@ -26,13 +28,20 @@ public class App extends Application{
             // now显示的是当前系统时间
             @Override
             public void handle(long now) {
-                model.update();
+
                 view.render();
+                if (now - tmptime < 1000_000_000) {
+                    return;
+                } else {
+                    tmptime = now;
+                    model.update();
+                }
+
             }
         }.start();
 
         // 给场景添加按键监听
-        view.getScene().addEventHandler(KeyEvent.KEY_PRESSED,controller);
+        view.getScene().addEventHandler(KeyEvent.KEY_PRESSED, controller);
     }
 
     public static void main(String[] args) {

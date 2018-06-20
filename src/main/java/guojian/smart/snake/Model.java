@@ -4,6 +4,9 @@
  */
 package guojian.smart.snake;
 
+
+import java.util.Date;
+
 public class Model {
 
     public static final int APPLE = -1;
@@ -12,14 +15,13 @@ public class Model {
     public static final int BODY = 1;
     public static final int TAIL = 1;
 
+
     /**
      * 贪食蛇画面中的地图
      * world为view中渲染的数据来源
      */
     public int[][] world;
-
     private int[][] snake;
-
     private int[][] walls;
     /**
      * 地图宽
@@ -34,9 +36,21 @@ public class Model {
      * 蛇的长度
      */
     private int count;
+    private boolean running;
+    /***
+     * 蛇下一步要走的方向
+     */
+    private Direction direction;
+
+
+    enum Direction {
+        UP,DOWN,LEFT,RIGHT
+    }
 
 
     public Model() {
+        running=false;
+        direction=Direction.DOWN;
         world = initIntArray(ROWS, COLS, BLANK);
         initSnake();
         initWalls();
@@ -74,9 +88,18 @@ public class Model {
     }
 
     /**
+     * 改变游戏状态，运行或暂停
+     */
+    public void changeState(){
+        running=!running;
+    }
+
+    /**
      * 更新world数据
      */
     public void update() {
-
+        if(running){
+            System.out.println(new Date());
+        }
     }
 }
