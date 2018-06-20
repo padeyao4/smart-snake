@@ -20,7 +20,7 @@ public class Model {
      * 贪食蛇画面中的地图
      * world为view中渲染的数据来源
      */
-    public  int[][] world;
+    public int[][] world;
     private int[][] snake;
     private int[][] walls;
     /**
@@ -83,6 +83,10 @@ public class Model {
     private void updateWorld(int[][] world, int[][] snake, int[][] walls, int[] apples) {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
+                // 清空
+                world[row][col]=BLANK;
+
+                // 从新生成
                 if (walls[row][col] == WALL) {
                     world[row][col] = WALL;
                 } else {
@@ -135,6 +139,8 @@ public class Model {
         snake = initIntArray(ROWS, COLS, BLANK);
         snake[ROWS / 2][COLS / 2] = TAIL;
         snake[(ROWS / 2) - 1][COLS / 2] = count;
+//        log(snake);
+//        System.out.println("init snake");
         head = new int[2];
         head[0] = ROWS / 2 - 1;
         head[1] = COLS / 2;
@@ -190,6 +196,7 @@ public class Model {
                     head[0] = tmp_head[0];
                     head[1] = tmp_head[1];
                     updateWorld(world, snake, walls, apples);
+//                    log(snake);
                     break;
                 case WALL:
                     gameOver();
@@ -213,8 +220,20 @@ public class Model {
         }
     }
 
+    private void log(int[][] world) {
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                System.out.print(world[row][col]);
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+    }
+
     private void eat_apple(int[][] snake, int[] tmp_head, int[] head) {
-        snake[tmp_head[0]][tmp_head[1]] = snake[head[0]][head[1]]++;
+        // 注意使用++ 和 --的时候，会改变数组中的值。
+        // 此处使用+1 而不能使用++
+        snake[tmp_head[0]][tmp_head[1]] = snake[head[0]][head[1]]+1;
     }
 
     private void gameOver() {
@@ -231,7 +250,7 @@ public class Model {
                 }
             }
         }
-        snake[head[0]][head[1]] = tmp;
+        snake[tmp_head[0]][tmp_head[1]] = tmp;
     }
 
 }
