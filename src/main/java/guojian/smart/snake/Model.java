@@ -139,8 +139,6 @@ public class Model {
         snake = initIntArray(ROWS, COLS, BLANK);
         snake[ROWS / 2][COLS / 2] = TAIL;
         snake[(ROWS / 2) - 1][COLS / 2] = count;
-//        log(snake);
-//        System.out.println("init snake");
         head = new int[2];
         head[0] = ROWS / 2 - 1;
         head[1] = COLS / 2;
@@ -172,31 +170,30 @@ public class Model {
     public void update() {
         if (running) {
             System.out.println(new Date());
-            int[] tmp_head = new int[]{head[0], head[1]};
-            int[][] tmp_world = initIntArray(ROWS, COLS, BLANK);
-            updateWorld(tmp_world, snake, walls, apples);
+            int[] tmpHead = new int[]{head[0], head[1]};
+            int[][] tmpWorld = initIntArray(ROWS, COLS, BLANK);
+            updateWorld(tmpWorld, snake, walls, apples);
             switch (direction) {
                 case RIGHT:
-                    tmp_head[1]++;
+                    tmpHead[1]++;
                     break;
                 case LEFT:
-                    tmp_head[1]--;
+                    tmpHead[1]--;
                     break;
                 case DOWN:
-                    tmp_head[0]++;
+                    tmpHead[0]++;
                     break;
                 case UP:
-                    tmp_head[0]--;
+                    tmpHead[0]--;
                     break;
             }
-            int type = tmp_world[tmp_head[0]][tmp_head[1]];
+            int type = tmpWorld[tmpHead[0]][tmpHead[1]];
             switch (type) {
                 case BLANK:
-                    snake_move(snake, tmp_head, head);
-                    head[0] = tmp_head[0];
-                    head[1] = tmp_head[1];
+                    snakeMove(snake, tmpHead, head);
+                    head[0] = tmpHead[0];
+                    head[1] = tmpHead[1];
                     updateWorld(world, snake, walls, apples);
-//                    log(snake);
                     break;
                 case WALL:
                     gameOver();
@@ -207,33 +204,24 @@ public class Model {
                     System.out.println("body");
                     break;
                 case APPLE:
-                    eat_apple(snake, tmp_head, head);
-                    count = snake[tmp_head[0]][tmp_head[1]];
-                    head[0] = tmp_head[0];
-                    head[1] = tmp_head[1];
+                    eatApple(snake, tmpHead, head);
+                    count = snake[tmpHead[0]][tmpHead[1]];
+                    head[0] = tmpHead[0];
+                    head[1] = tmpHead[1];
                     apples = randomApple(snake, walls);
                     updateWorld(world, snake, walls, apples);
                     break;
-
+                default:
+                    return;
             }
 
         }
     }
 
-    private void log(int[][] world) {
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                System.out.print(world[row][col]);
-                System.out.print(" ");
-            }
-            System.out.println();
-        }
-    }
-
-    private void eat_apple(int[][] snake, int[] tmp_head, int[] head) {
+    private void eatApple(int[][] snake, int[] tmpHead, int[] head) {
         // 注意使用++ 和 --的时候，会改变数组中的值。
         // 此处使用+1 而不能使用++
-        snake[tmp_head[0]][tmp_head[1]] = snake[head[0]][head[1]]+1;
+        snake[tmpHead[0]][tmpHead[1]] = snake[head[0]][head[1]]+1;
     }
 
     private void gameOver() {
@@ -241,7 +229,7 @@ public class Model {
         System.out.println("gameover");
     }
 
-    private void snake_move(int[][] snake, int[] tmp_head, int[] head) {
+    private void snakeMove(int[][] snake, int[] tmphead, int[] head) {
         int tmp = snake[head[0]][head[1]];
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
@@ -250,7 +238,7 @@ public class Model {
                 }
             }
         }
-        snake[tmp_head[0]][tmp_head[1]] = tmp;
+        snake[tmphead[0]][tmphead[1]] = tmp;
     }
 
 }
