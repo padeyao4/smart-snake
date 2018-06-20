@@ -4,8 +4,9 @@
  */
 package guojian.smart.snake;
 
-
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 public class Model {
 
@@ -15,7 +16,6 @@ public class Model {
     public static final int BODY = 1;
     public static final int TAIL = 1;
 
-
     /**
      * 贪食蛇画面中的地图
      * world为view中渲染的数据来源
@@ -23,6 +23,11 @@ public class Model {
     public int[][] world;
     private int[][] snake;
     private int[][] walls;
+    /**
+     * 苹果的坐标
+     * [row,col]
+     */
+    private int[] apples;
     /**
      * 地图宽
      */
@@ -42,19 +47,75 @@ public class Model {
      */
     private Direction direction;
 
+    public void moveUp() {
+        direction = Direction.UP;
+    }
+
+    public void moveDown() {
+        direction = Direction.DOWN;
+    }
+
+    public void moveLeft() {
+        direction = Direction.LEFT;
+    }
+
+    public void moveRight() {
+        direction = Direction.RIGHT;
+    }
+
 
     enum Direction {
-        UP,DOWN,LEFT,RIGHT
+        UP, DOWN, LEFT, RIGHT
     }
 
 
     public Model() {
-        running=false;
-        direction=Direction.DOWN;
+        running = false;
+        direction = Direction.DOWN;
         world = initIntArray(ROWS, COLS, BLANK);
         initSnake();
         initWalls();
+        apples = randomApple(snake, walls);
+        updateWorld(world, snake, walls, apples);
     }
+
+    private void updateWorld(int[][] world, int[][] snake, int[][] walls, int[] apples) {
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (walls[row][col] == WALL) {
+                    world[row][col] = WALL;
+                } else {
+                    if (snake[row][col] != BLANK) {
+                        world[row][col] = BODY;
+                    }
+                }
+            }
+        }
+        world[apples[0]][apples[1]] = APPLE;
+    }
+
+    /**
+     * 随机生成苹果坐标
+     *
+     * @param snake
+     * @param walls
+     * @return
+     */
+    private int[] randomApple(int[][] snake, int[][] walls) {
+        ArrayList<int[]> list = new ArrayList(ROWS * COLS);
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (walls[row][col] == BLANK && snake[row][col] == BLANK) {
+                    list.add(new int[]{row, col});
+                }
+            }
+        }
+        Random r = new Random();
+        int index = r.nextInt(list.size());
+
+        return list.get(index);
+    }
+
 
     private void initWalls() {
         walls = initIntArray(ROWS, COLS, BLANK);
@@ -90,16 +151,20 @@ public class Model {
     /**
      * 改变游戏状态，运行或暂停
      */
-    public void changeState(){
-        running=!running;
+    public void changeState() {
+        running = !running;
     }
 
     /**
      * 更新world数据
      */
     public void update() {
-        if(running){
+        if (running) {
             System.out.println(new Date());
+            switch (direction) {
+                case RIGHT:
+
+            }
         }
     }
 }

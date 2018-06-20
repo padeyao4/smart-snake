@@ -9,7 +9,10 @@ import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-public class Controller implements EventHandler{
+/**
+ * 处理键盘事件
+ */
+public class Controller implements EventHandler {
     Model m;
 
     public Controller(Model model) {
@@ -18,11 +21,28 @@ public class Controller implements EventHandler{
 
     @Override
     public void handle(Event event) {
-        if(event.getEventType().equals(KeyEvent.KEY_PRESSED)){
-            if(((KeyEvent)event).getCode()== KeyCode.ENTER){
-                System.out.println("111");
+        if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
+            KeyCode keyCode = ((KeyEvent) event).getCode();
+            switch (keyCode) {
+                case ENTER:
+                    m.changeState();
+                    break;
+                case UP:
+                    m.moveUp();
+                    break;
+                case DOWN:
+                    m.moveDown();
+                    break;
+                case LEFT:
+                    m.moveLeft();
+                    break;
+                case RIGHT:
+                    m.moveRight();
+                    break;
+                default:
+                    System.out.println(keyCode);
             }
-//            m.changeState();
+
         }
     }
 }
