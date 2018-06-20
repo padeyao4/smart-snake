@@ -18,6 +18,6 @@ public class Conf {
      * 窗口大小
      */
     public static final double WINDOW_WIDTH = 399d;
-    public static  final  double WINDOW_HEIGHT= 500d;
+    public static  final  double WINDOW_HEIGHT= 421d;
 
 }
