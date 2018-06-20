@@ -164,6 +164,7 @@ public class Model {
     }
 
 
+    private int[][] tmpWorld=initIntArray(ROWS, COLS, BLANK);
     /**
      * 更新world数据
      */
@@ -171,7 +172,6 @@ public class Model {
         if (running) {
             System.out.println(new Date());
             int[] tmpHead = new int[]{head[0], head[1]};
-            int[][] tmpWorld = initIntArray(ROWS, COLS, BLANK);
             updateWorld(tmpWorld, snake, walls, apples);
             switch (direction) {
                 case RIGHT:
