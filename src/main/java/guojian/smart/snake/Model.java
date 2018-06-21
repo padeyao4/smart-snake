@@ -209,7 +209,7 @@ public class Model {
             System.out.println(new Date());
 
             if (auto) {
-                tmpdirection = new BFSRobot(snake, walls, apples, world, head).search();
+                tmpdirection = new BFS(snake, walls, apples, world, head).search();
             }
 
             int[] tmpHead = new int[]{head[0], head[1]};
