@@ -28,6 +28,7 @@ public class App extends Application {
             // now显示的是当前系统时间
             @Override
             public void handle(long now) {
+                //控制主主程序运行时间
                 if (now - tmptime < 1000_000_000) {
                     return;
                 } else {

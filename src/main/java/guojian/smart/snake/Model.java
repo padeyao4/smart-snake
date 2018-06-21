@@ -28,6 +28,10 @@ public class Model {
      * [row,col]
      */
     private int[] apples;
+    /**
+     * 当前蛇的头部的坐标
+     * [row,col]
+     */
     private int[] head;
     /**
      * 地图宽
@@ -44,26 +48,37 @@ public class Model {
     private int count;
     private boolean running;
     /***
-     * 蛇下一步要走的方向
+     * 蛇上一步要走的方向
      */
-    private Direction direction;
+    public Direction direction;
+    /**
+     * 储存当前按键按下的方向
+     */
+    private Direction tmpdirection;
 
     public void moveUp() {
-        direction = Direction.UP;
+        if (!auto)
+            tmpdirection = Direction.UP;
     }
 
     public void moveDown() {
-        direction = Direction.DOWN;
+        if (!auto)
+            tmpdirection = Direction.DOWN;
     }
 
     public void moveLeft() {
-        direction = Direction.LEFT;
+        if (!auto)
+            tmpdirection = Direction.LEFT;
     }
 
     public void moveRight() {
-        direction = Direction.RIGHT;
+        if (!auto)
+            tmpdirection = Direction.RIGHT;
     }
 
+    public void changeAuto() {
+        auto = !auto;
+    }
 
     enum Direction {
         UP, DOWN, LEFT, RIGHT
@@ -73,6 +88,7 @@ public class Model {
     public Model() {
         running = false;
         direction = Direction.UP;
+        tmpdirection = Direction.UP;
         world = initIntArray(ROWS, COLS, BLANK);
         initSnake();
         initWalls();
@@ -80,11 +96,20 @@ public class Model {
         updateWorld(world, snake, walls, apples);
     }
 
-    private void updateWorld(int[][] world, int[][] snake, int[][] walls, int[] apples) {
+    /**
+     * 在更新数据到world中,
+     * 在world二维数组中合并snake walls 和apple
+     * world中的数据只有WALL APPLE 和 BODY
+     * @param world
+     * @param snake
+     * @param walls
+     * @param apples
+     */
+    public static void updateWorld(int[][] world, int[][] snake, int[][] walls, int[] apples) {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
                 // 清空
-                world[row][col]=BLANK;
+                world[row][col] = BLANK;
 
                 // 从新生成
                 if (walls[row][col] == WALL) {
@@ -145,7 +170,7 @@ public class Model {
     }
 
 
-    private int[][] initIntArray(int rows, int cols, int b) {
+    public static int[][] initIntArray(int rows, int cols, int b) {
         int[][] temp = new int[rows][cols];
 
         for (int row = 0; row < rows; row++) {
@@ -164,16 +189,31 @@ public class Model {
     }
 
 
-    private int[][] tmpWorld=initIntArray(ROWS, COLS, BLANK);
+    /**
+     * world的副本，中间数据，用来判断游戏是否结束
+     */
+    private int[][] tmpWorld = initIntArray(ROWS, COLS, BLANK);
+
+    /**
+     * 是否启动ai
+     *
+     * 默认不启动
+     */
+    private boolean auto = false;
+
     /**
      * 更新world数据
      */
     public void update() {
         if (running) {
             System.out.println(new Date());
+
+            if (auto) {
+                tmpdirection = new BFSRobot(snake, walls, apples, world, head).search();
+            }
+
             int[] tmpHead = new int[]{head[0], head[1]};
-            updateWorld(tmpWorld, snake, walls, apples);
-            switch (direction) {
+            switch (tmpdirection) {
                 case RIGHT:
                     tmpHead[1]++;
                     break;
@@ -187,10 +227,13 @@ public class Model {
                     tmpHead[0]--;
                     break;
             }
+
+            updateWorld(tmpWorld, snake, walls, apples);
             int type = tmpWorld[tmpHead[0]][tmpHead[1]];
             switch (type) {
                 case BLANK:
                     snakeMove(snake, tmpHead, head);
+                    direction = tmpdirection;
                     head[0] = tmpHead[0];
                     head[1] = tmpHead[1];
                     updateWorld(world, snake, walls, apples);
@@ -205,6 +248,7 @@ public class Model {
                     break;
                 case APPLE:
                     eatApple(snake, tmpHead, head);
+                    direction = tmpdirection;
                     count = snake[tmpHead[0]][tmpHead[1]];
                     head[0] = tmpHead[0];
                     head[1] = tmpHead[1];
@@ -221,7 +265,7 @@ public class Model {
     private void eatApple(int[][] snake, int[] tmpHead, int[] head) {
         // 注意使用++ 和 --的时候，会改变数组中的值。
         // 此处使用+1 而不能使用++
-        snake[tmpHead[0]][tmpHead[1]] = snake[head[0]][head[1]]+1;
+        snake[tmpHead[0]][tmpHead[1]] = snake[head[0]][head[1]] + 1;
     }
 
     private void gameOver() {

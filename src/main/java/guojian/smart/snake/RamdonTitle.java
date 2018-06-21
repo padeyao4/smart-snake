@@ -7,6 +7,9 @@ package guojian.smart.snake;
 import java.util.Random;
 
 /**
+ * Author by guojian, Email guojian_k@qq.com, Date on 2018/6/21 10:34 AM
+ * PS: Not easy to write code, please indicate.
+ *
  * for fun
  */
 public class RamdonTitle {
