@@ -100,6 +100,7 @@ public class Model {
      * 在更新数据到world中,
      * 在world二维数组中合并snake walls 和apple
      * world中的数据只有WALL APPLE 和 BODY
+     *
      * @param world
      * @param snake
      * @param walls
@@ -196,7 +197,7 @@ public class Model {
 
     /**
      * 是否启动ai
-     *
+     * <p>
      * 默认不启动
      */
     private boolean auto = false;
@@ -210,6 +211,13 @@ public class Model {
 
             if (auto) {
                 tmpdirection = new BFS(snake, walls, apples, world, head).search();
+            }
+
+            if ((tmpdirection == Direction.UP && direction == Direction.DOWN) ||
+                    (tmpdirection == Direction.DOWN && direction == Direction.UP) ||
+                    (tmpdirection == Direction.LEFT && direction == Direction.RIGHT) ||
+                    (tmpdirection == Direction.RIGHT && direction == Direction.LEFT)) {
+                tmpdirection = direction;
             }
 
             int[] tmpHead = new int[]{head[0], head[1]};
@@ -284,5 +292,4 @@ public class Model {
         }
         snake[tmphead[0]][tmphead[1]] = tmp;
     }
-
 }

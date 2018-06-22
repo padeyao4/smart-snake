@@ -6,4 +6,4 @@ target/
 bin
 .class
 .idea
-.iml
+*.iml

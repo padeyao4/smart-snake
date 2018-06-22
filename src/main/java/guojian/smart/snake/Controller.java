@@ -31,20 +31,16 @@ public class Controller implements EventHandler {
                     m.changeAuto();
                     break;
                 case UP:
-                    if (m.direction != Model.Direction.DOWN)
-                        m.moveUp();
+                    m.moveUp();
                     break;
                 case DOWN:
-                    if (m.direction != Model.Direction.UP)
-                        m.moveDown();
+                    m.moveDown();
                     break;
                 case LEFT:
-                    if (m.direction != Model.Direction.RIGHT)
-                        m.moveLeft();
+                    m.moveLeft();
                     break;
                 case RIGHT:
-                    if (m.direction != Model.Direction.LEFT)
-                        m.moveRight();
+                    m.moveRight();
                     break;
                 default:
                     System.out.println(keyCode);
