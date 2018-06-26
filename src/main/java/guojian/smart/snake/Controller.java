@@ -27,7 +27,7 @@ public class Controller implements EventHandler {
                 case ENTER:
                     m.changeState();
                     break;
-                case F1:
+                case SPACE:
                     m.changeAuto();
                     break;
                 case UP:

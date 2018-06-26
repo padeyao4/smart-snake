@@ -72,9 +72,12 @@ public class BFS extends Robot {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (Math.abs(Math.abs(i) - Math.abs(j)) == 1) {
-                    List tmp = searchShortestPath(new int[]{src[0] + i, src[1] + j}, dst, tmpWorld);
-                    if (tmp != null) {
-                        list.add(tmp);
+                    int[] tmpSrc = new int[]{src[0] + i, src[1] + j};
+                    if (tmpWorld[tmpSrc[0]][tmpSrc[1]] != WALL && tmpWorld[tmpSrc[0]][tmpSrc[1]] != BODY) {
+                        List tmp = searchShortestPath(tmpSrc, dst, tmpWorld);
+                        if (tmp != null) {
+                            list.add(tmp);
+                        }
                     }
                 }
             }
@@ -99,6 +102,7 @@ public class BFS extends Robot {
         Queue<int[]> q = new LinkedList();
         Set<Integer> s = new HashSet();
 
+        s.add(src[0] * COLS + src[1]);
         q.offer(src);
         m.put(src[0] * COLS + src[1], -1);
         while (q.size() > 0) {
@@ -111,15 +115,17 @@ public class BFS extends Robot {
                     key = m.get(key);
                 }
                 Collections.reverse(path);
+                path.remove(0);
                 return path;
             } else {
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         if (Math.abs(Math.abs(i) - Math.abs(j)) == 1) {
-                            int index = (n[0] + i) * COLS + n[1] + j;
-                            int v = tmpWorld[n[0] + i][n[1] + j];
+                            int[] tmp = new int[]{n[0] + i, n[1] + j};
+                            int index = tmp[0] * COLS + tmp[1];
+                            int v = tmpWorld[tmp[0]][tmp[1]];
                             if ((v == BLANK || v == APPLE) && !s.contains(index)) {
-                                q.offer(new int[]{n[0] + i, n[1] + j});
+                                q.offer(tmp);
                                 s.add(index);
                                 m.put(index, n[0] * COLS + n[1]);
                             }

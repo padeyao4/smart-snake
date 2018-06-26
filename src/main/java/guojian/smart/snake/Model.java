@@ -132,7 +132,7 @@ public class Model {
      * @param walls
      * @return
      */
-    private int[] randomApple(int[][] snake, int[][] walls) {
+    public static int[] randomApple(int[][] snake, int[][] walls) {
         ArrayList<int[]> list = new ArrayList(ROWS * COLS);
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
@@ -161,12 +161,13 @@ public class Model {
     }
 
     private void initSnake() {
-        count = 2;
+        count = 3;
         snake = initIntArray(ROWS, COLS, BLANK);
         snake[ROWS / 2][COLS / 2] = TAIL;
-        snake[(ROWS / 2) - 1][COLS / 2] = count;
+        snake[ROWS / 2 - 1][COLS / 2] = 2;
+        snake[ROWS / 2 - 2][COLS / 2] = count;
         head = new int[2];
-        head[0] = ROWS / 2 - 1;
+        head[0] = ROWS / 2 - 2;
         head[1] = COLS / 2;
     }
 
