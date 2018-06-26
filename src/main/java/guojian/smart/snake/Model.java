@@ -211,7 +211,7 @@ public class Model {
             System.out.println(new Date());
 
             if (auto) {
-                tmpdirection = new BFS(snake, walls, apples, world, head).search();
+                tmpdirection = new BFS(snake, walls, apples, world, head,this).search();
             }
 
             if ((tmpdirection == Direction.UP && direction == Direction.DOWN) ||
@@ -249,7 +249,7 @@ public class Model {
                     break;
                 case WALL:
                     gameOver();
-                    System.out.println("Wall");
+                    System.out.println("Wall ! next direction : "+ direction);
                     break;
                 case BODY:
                     gameOver();

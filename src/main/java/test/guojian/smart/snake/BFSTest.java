@@ -29,7 +29,7 @@ public class BFSTest {
     public void before() throws Exception {
         m = new Model();
         world = m.world.clone();
-        src = new int[]{2 ,2};
+        src = new int[]{ 1,1};
         dst = new int[]{ROWS / 2, COLS / 2};
     }
 

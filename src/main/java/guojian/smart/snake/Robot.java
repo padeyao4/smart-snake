@@ -9,13 +9,15 @@ package guojian.smart.snake;
 public abstract class Robot {
     int[][] snake, walls, world;
     int[] apples, head, tail;
+    Model m;
 
-    public Robot(int[][] snake, int[][] walls, int[] apples, int[][] world, int[] head) {
+    public Robot(int[][] snake, int[][] walls, int[] apples, int[][] world, int[] head,Model m ) {
         this.snake = snake.clone();
         this.walls = walls.clone();
         this.world = world.clone();
         this.apples = apples.clone();
         this.head = head.clone();
+        this.m = m;
         tail = getTail();
     }
 
