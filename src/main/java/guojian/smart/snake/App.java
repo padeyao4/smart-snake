@@ -29,7 +29,7 @@ public class App extends Application {
             @Override
             public void handle(long now) {
                 //控制主主程序运行时间
-                if (now - tmptime < 1000_000) {
+                if (now - tmptime < 1000_00) {
                     return;
                 } else {
                     tmptime = now;

@@ -1,6 +1,8 @@
 package guojian.smart.snake;
 
 
+import test.guojian.smart.snake.BFSTest;
+
 import java.util.*;
 
 import static guojian.smart.snake.Model.*;
@@ -26,12 +28,13 @@ public class BFS extends Robot {
         add(1);
     }};
 
+
     private static void shuff() {
         Collections.shuffle(rs);
         Collections.shuffle(cs);
+        System.out.println("shuff!");
     }
 
-    Direction[] directions = Direction.values();
 
     int[][] tmpWorld = initIntArray(ROWS, COLS, BLANK);
 
@@ -46,7 +49,7 @@ public class BFS extends Robot {
         int[] next = null;
 
         List shortPath = searchShortestPath(head, tail, tmpWorld);
-        if (shortPath != null) {
+        if (shortPath != null && shortPath.size()>0) {
             List<int[]> applePath = searchShortestPath(head, apples, tmpWorld);
             if (applePath != null) {
                 next = (applePath.size() == 0 ? apples : applePath.get(0));
@@ -56,6 +59,14 @@ public class BFS extends Robot {
                 if (nextShortPath == null) {
                     System.out.println("4");
                     List<int[]> fartherPath = findFartherPath(head, tail, tmpWorld);
+                    if (fartherPath == null) {
+                        m.changeState();
+                        System.out.println("head:" + head[0] + "," + head[1]);
+                        System.out.println("tail:" + tail[0] + "," + tail[1]);
+                        tmpWorld[head[0]][head[1]] = 7;
+                        tmpWorld[tail[0]][tail[1]] = 5;
+                        debug_log(tmpWorld);
+                    }
                     next = fartherPath.size() == 0 ? tail : fartherPath.get(0);
                     System.out.println("next: " + next[0] + " , " + next[1]);
                 } else {
@@ -63,11 +74,29 @@ public class BFS extends Robot {
                 }
             } else {
                 List<int[]> fartherPath = findFartherPath(head, tail, tmpWorld);
+//                if (fartherPath == null || fartherPath.size() < 2) {
+//                    m.changeState();
+//                    System.out.println("head:" + head[0] + "," + head[1]);
+//                    System.out.println("tail:" + tail[0] + "," + tail[1]);
+//                    tmpWorld[head[0]][head[1]] = 7;
+//                    tmpWorld[tail[0]][tail[1]] = 5;
+//                    debug_log(tmpWorld);
+//                }
                 next = fartherPath.size() == 0 ? tail : fartherPath.get(0);
                 System.out.println("2");
             }
         } else {
             System.out.println("3");
+            List<int[]> fartherPath = findFartherPath(head, tail, tmpWorld);
+            if (fartherPath == null || fartherPath.size() < 2) {
+                m.changeState();
+                System.out.println("head:" + head[0] + "," + head[1]);
+                System.out.println("tail:" + tail[0] + "," + tail[1]);
+                tmpWorld[head[0]][head[1]] = 7;
+                tmpWorld[tail[0]][tail[1]] = 5;
+                debug_log(tmpWorld);
+            }
+            next = fartherPath.size() == 0 ? tail : fartherPath.get(0);
         }
 
         return getDirection(next, head);
@@ -80,6 +109,7 @@ public class BFS extends Robot {
      * @return
      */
     private Direction getDirection(int[] next, int[] head) {
+        Direction[] directions = Direction.values();
         Direction direction = directions[new Random().nextInt(directions.length)];
         if (next != null) {
             int row = next[0] - head[0];
@@ -109,6 +139,7 @@ public class BFS extends Robot {
      * @return
      */
     public static List<int[]> findFartherPath(int[] src, int[] dst, int[][] tmpWorld) {
+        doShuff(src, dst);
 
         List<List<int[]>> list = new ArrayList<>(4);
         for (int i = -1; i <= 1; i++) {
@@ -127,6 +158,15 @@ public class BFS extends Robot {
         }
         list.sort((o1, o2) -> o2.size() - o1.size());
         return list.size() == 0 ? null : list.get(0);
+    }
+
+    private static void doShuff(int[] src, int[] dst) {
+        int dc = src[0] << 24 + src[1] << 16 + dst[0] << 8 + dst[1];
+        if (records.contains(dc)) {
+            shuff();
+        } else {
+            records.add(dc);
+        }
     }
 
 

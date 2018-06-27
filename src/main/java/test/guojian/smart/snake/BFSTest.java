@@ -56,7 +56,7 @@ public class BFSTest {
         debug_log(tmpWorld);
     }
 
-    private void debug_log(int[][] world) {
+    public void debug_log(int[][] world) {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
                 if (world[row][col] < 0) {

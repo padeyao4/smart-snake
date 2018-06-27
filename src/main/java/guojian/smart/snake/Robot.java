@@ -1,5 +1,8 @@
 package guojian.smart.snake;
 
+import static guojian.smart.snake.Model.COLS;
+import static guojian.smart.snake.Model.ROWS;
+
 /**
  * Author by guojian, Email guojian_k@qq.com, Date on 2018/6/21 10:22 AM
  * PS: Not easy to write code, please indicate.
@@ -10,6 +13,20 @@ public abstract class Robot {
     int[][] snake, walls, world;
     int[] apples, head, tail;
     Model m;
+
+    public static void debug_log(int[][] world) {
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                if (world[row][col] < 0) {
+                    System.out.print(world[row][col]);
+                } else {
+                    System.out.print(" " + world[row][col]);
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
 
     public Robot(int[][] snake, int[][] walls, int[] apples, int[][] world, int[] head,Model m ) {
         this.snake = snake.clone();

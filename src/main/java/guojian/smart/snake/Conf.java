@@ -10,9 +10,11 @@ package guojian.smart.snake;
 public class Conf {
     /**
      * 贪食蛇游戏地图大小
+     *
+     * 最大长宽255，在BFS类中做了限制。超出255溢出
      */
-    static final int WIDTH = 20;
-    static final int HEIGHT = 20;
+    static final int WIDTH = 10;
+    static final int HEIGHT = 10;
 
     /**
      * 窗口大小
