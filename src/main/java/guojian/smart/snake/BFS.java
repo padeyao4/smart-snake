@@ -1,8 +1,6 @@
 package guojian.smart.snake;
 
 
-import test.guojian.smart.snake.BFSTest;
-
 import java.util.*;
 
 import static guojian.smart.snake.Model.*;
@@ -49,7 +47,7 @@ public class BFS extends Robot {
         int[] next = null;
 
         List shortPath = searchShortestPath(head, tail, tmpWorld);
-        if (shortPath != null && shortPath.size()>0) {
+        if (shortPath != null && shortPath.size() > 0) {
             List<int[]> applePath = searchShortestPath(head, apples, tmpWorld);
             if (applePath != null) {
                 next = (applePath.size() == 0 ? apples : applePath.get(0));
@@ -88,14 +86,14 @@ public class BFS extends Robot {
         } else {
             System.out.println("3");
             List<int[]> fartherPath = findFartherPath(head, tail, tmpWorld);
-            if (fartherPath == null || fartherPath.size() < 2) {
-                m.changeState();
-                System.out.println("head:" + head[0] + "," + head[1]);
-                System.out.println("tail:" + tail[0] + "," + tail[1]);
-                tmpWorld[head[0]][head[1]] = 7;
-                tmpWorld[tail[0]][tail[1]] = 5;
-                debug_log(tmpWorld);
-            }
+//            if (fartherPath == null || fartherPath.size() < 2) {
+//                m.changeState();
+//                System.out.println("head:" + head[0] + "," + head[1]);
+//                System.out.println("tail:" + tail[0] + "," + tail[1]);
+//                tmpWorld[head[0]][head[1]] = 7;
+//                tmpWorld[tail[0]][tail[1]] = 5;
+//                debug_log(tmpWorld);
+//            }
             next = fartherPath.size() == 0 ? tail : fartherPath.get(0);
         }
 
