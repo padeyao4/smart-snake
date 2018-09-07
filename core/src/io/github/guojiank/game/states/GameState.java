@@ -8,7 +8,7 @@ import static com.badlogic.gdx.Input.Keys.SPACE;
 
 public class GameState extends State {
     Sound sound;
-    boolean musicPlay = true;
+    boolean musicPlay = false;
 
     public GameState(StateManagor stateManagor) {
         super(stateManagor);
@@ -19,7 +19,7 @@ public class GameState extends State {
 
     @Override
     void handleInput() {
-        if (Gdx.input.isKeyPressed(SPACE)) {
+        if (Gdx.input.isKeyJustPressed(SPACE)) {
             if (musicPlay = !musicPlay) {
                 sound.pause();
             } else {

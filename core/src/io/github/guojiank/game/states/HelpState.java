@@ -16,7 +16,7 @@ public class HelpState extends State {
     @Override
     void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-                stateManagor.setState(new GameState(stateManagor));
+            stateManagor.setState(new GameState(stateManagor));
         }
     }
 
