@@ -7,7 +7,7 @@ import java.util.Random;
 
 import static io.github.guojiank.game.core.Model.Cell.*;
 
-public class Model {
+public class Model implements Cloneable {
     public static final int COLS = 20;
     public static final int ROWS = 20;
 
@@ -19,7 +19,7 @@ public class Model {
         SNAKE, WALL, BLANK, APPLE
     }
 
-    public static class Coord {
+    public static class Coord implements Cloneable {
         int row;
         int col;
 
@@ -50,6 +50,11 @@ public class Model {
 
         public void setCol(int col) {
             this.col = col;
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone();
         }
 
         @Override
@@ -97,7 +102,6 @@ public class Model {
     public Model() {
         snakes = new ArrayList<>(COLS * ROWS + 1);
         walls = new ArrayList<>(2 * COLS + 2 * ROWS);
-        init();
     }
 
     public void init() {
@@ -181,12 +185,12 @@ public class Model {
 
     }
 
-    private void move(Coord nextStep) {
+    public void move(Coord nextStep) {
         snakes.add(nextStep);
         snakes.remove(0);
     }
 
-    private void eatApple(Coord nextStep) {
+    public void eatApple(Coord nextStep) {
         snakes.add(nextStep);
     }
 
@@ -203,6 +207,7 @@ public class Model {
     }
 
     private List<Coord> bestPath; //算法寻找的最好路径,包含目标头和尾
+
     private Coord step; // 手工输入的下一步
 
     public List<Coord> getBestPath() {
@@ -261,5 +266,15 @@ public class Model {
         }
 
         return nextStep;
+    }
+
+    @Override
+    protected Model clone() throws CloneNotSupportedException {
+        Model o = (Model) super.clone();
+        o.snakes = (ArrayList<Coord>) this.snakes.clone();
+        o.walls = (ArrayList<Coord>) this.walls.clone();
+        o.apple = (Coord) this.apple.clone();
+        o.bestPath = null;
+        return o;
     }
 }

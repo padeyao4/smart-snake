@@ -1,10 +1,12 @@
 package io.github.guojiank.game.core;
 
-import io.github.guojiank.game.core.Model.*;
+import io.github.guojiank.game.core.Model.Cell;
+import io.github.guojiank.game.core.Model.Coord;
 
 import java.util.*;
 
-import static io.github.guojiank.game.core.Model.Cell.*;
+import static io.github.guojiank.game.core.Model.Cell.SNAKE;
+import static io.github.guojiank.game.core.Model.Cell.WALL;
 import static java.lang.Math.abs;
 
 public class Algorithm {
@@ -62,6 +64,43 @@ public class Algorithm {
         }
 
         return null;
+    }
+
+    /**
+     * 复制一份迷宫世界，根据给出的路径，让复制出的世界按照给出的路径运行。<br/>
+     * <p>
+     * 路径中如果 包含 除head和apple以外的其他点，那么蛇不会走到终点，会返回中途的平行世界
+     *
+     * @param model
+     * @param path  路径必须包含蛇头(head)到目标点，目标点可以是 snake ,apple,walls ,blank
+     * @return 返回一个平行世界
+     */
+    public static Model getShadowModelByPath(Model model, LinkedList<Coord> path) {
+        Model shadowModel = null;
+        LinkedList<Coord> shadowPath = null;
+
+        try {
+            shadowModel = model.clone();
+            shadowPath = new LinkedList<>();
+            for(Coord c:path){
+                shadowPath.add((Coord) c.clone());
+            }
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        shadowPath.remove(0);
+
+        for (Coord p : shadowPath) {
+            if (p.equals(shadowModel.getApple()))
+                shadowModel.eatApple(p);
+            else if (shadowModel.getWalls().contains(p) || shadowModel.getSnake().contains(p)) {
+                break;
+            } else shadowModel.move(p);
+        }
+
+        return shadowModel;
     }
 
 }
