@@ -251,7 +251,7 @@ public class Model {
             nextStep = bestPath.get(1);
             bestPath = null;
         }
-        if (step != null && step != getSnakeNeck()) {
+        if (step != null && !step.equals(getSnakeNeck())) {
             nextStep = step;
             step = null;
         }
