@@ -5,9 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import io.github.guojiank.game.model.*;
-import io.github.guojiank.game.model.Model.Coord;
+import io.github.guojiank.game.core.*;
+import io.github.guojiank.game.core.Model.Coord;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -59,8 +60,8 @@ public class GameState extends State {
         batch.begin();
         batch.draw(texture, 0, 0);
         batch.end();
-        handInput();
         update(Gdx.graphics.getDeltaTime());
+        handInput();
     }
 
 
@@ -68,13 +69,18 @@ public class GameState extends State {
 
     /**
      * 游戏逻辑更新
+     *
      * @param deltaTime
      */
     void update(float deltaTime) {
         tmpTime += deltaTime;
         if (tmpTime > 1) {
-            model.update();
             tmpTime--;
+            model.update();
+            List<Coord> path = Algorithm.findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), new HashSet<Coord>());
+            if (path != null) {
+                model.setBestPath(path);
+            }
         }
     }
 
@@ -83,9 +89,22 @@ public class GameState extends State {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
         drawWord();
-        draw_apple();
-        draw_snake();
+        drawApple();
+        drawSnake();
+        drawPath();
+
         texture.draw(pixmap, 0, 0);
+    }
+
+    private void drawPath() {
+        List<Coord> path = model.getBestPath();
+        if (path == null) return;
+        pixmap.setColor(Color.GREEN);
+        for (int i = 0; i < path.size() - 1; i++) {
+            Coord a = path.get(i);
+            Coord b = path.get(i + 1);
+            pixmap.drawLine(a.getX() * offset_x + offset_x / 2, a.getY() * offset_y + offset_y / 2, b.getX() * offset_x + offset_x / 2, b.getY() * offset_y + offset_y / 2);
+        }
     }
 
     private void drawWord() {
@@ -99,7 +118,7 @@ public class GameState extends State {
                     pixmap.setColor(Color.GRAY);
                 if (type == Model.Cell.WALL)
                     pixmap.setColor(Color.WHITE);
-                if(type==Model.Cell.BLANK)
+                if (type == Model.Cell.BLANK)
                     pixmap.setColor(Color.BLACK);
 
                 pixmap.drawRectangle(col * offset_x, row * offset_y, offset_x, offset_y);
@@ -110,19 +129,19 @@ public class GameState extends State {
     private void draw() {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
-        draw_snake();
-        draw_wall();
-        draw_apple();
+        drawSnake();
+        drawWall();
+        drawApple();
         texture.draw(pixmap, 0, 0);
     }
 
-    private void draw_apple() {
+    private void drawApple() {
         Coord a = model.getApple();
         pixmap.setColor(Color.RED);
         pixmap.drawRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
     }
 
-    private void draw_wall() {
+    private void drawWall() {
         List<Coord> walls = model.getWalls();
         pixmap.setColor(Color.WHITE);
         for (int i = 0; i < walls.size(); i++) {
@@ -131,7 +150,7 @@ public class GameState extends State {
         }
     }
 
-    private void draw_snake() {
+    private void drawSnake() {
         List<Coord> snake = model.getSnake();
         pixmap.setColor(Color.GRAY);
         for (int i = 0; i < snake.size() - 1; i++) {

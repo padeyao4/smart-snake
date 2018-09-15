@@ -1,11 +1,11 @@
-package io.github.guojiank.game.model;
+package io.github.guojiank.game.core;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static io.github.guojiank.game.model.Model.Cell.*;
+import static io.github.guojiank.game.core.Model.Cell.*;
 
 public class Model {
     public static final int COLS = 20;
@@ -204,6 +204,10 @@ public class Model {
 
     private List<Coord> bestPath; //算法寻找的最好路径,包含目标头和尾
     private Coord step; // 手工输入的下一步
+
+    public List<Coord> getBestPath() {
+        return bestPath;
+    }
 
     public void setBestPath(List<Coord> bestPath) {
         this.bestPath = bestPath;
