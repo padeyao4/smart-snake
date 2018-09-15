@@ -3,19 +3,13 @@ package io.github.guojiank.game.states;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
 public abstract class State {
-    StateManagor stateManagor;
+    StateManager stateManager;
 
-    public State(StateManagor stateManagor) {
-        this.stateManagor = stateManagor;
+    public State(StateManager stateManager) {
+        this.stateManager = stateManager;
     }
-
-    abstract void handleInput();
 
     abstract void render(Batch batch);
-
-    void update() {
-        handleInput();
-    }
 
     public abstract void dispose();
 }

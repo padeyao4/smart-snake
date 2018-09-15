@@ -2,38 +2,34 @@ package io.github.guojiank.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import io.github.guojiank.game.model.Model;
 import io.github.guojiank.game.states.GreetingState;
-import io.github.guojiank.game.states.StateManagor;
+import io.github.guojiank.game.states.StateManager;
 
 public class SmartSnake extends Game {
+
     SpriteBatch batch;
-    StateManagor stateManagor;
-//    AssetManager assetManager;
+    StateManager stateManager;
 
     @Override
     public void create() {
-//        assetManager = new AssetManager();
-//        assetManager.load("WhereIstheLove.mp3", Music.class);
         batch = new SpriteBatch();
-        stateManagor = new StateManagor(batch);
-        stateManagor.setState(new GreetingState(stateManagor));
+        stateManager = new StateManager(batch);
+        stateManager.setState(new GreetingState(stateManager));
     }
 
     @Override
     public void render() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stateManagor.render();
-        stateManagor.update();
+        stateManager.render();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        stateManagor.dispose();
+        stateManager.dispose();
     }
 }

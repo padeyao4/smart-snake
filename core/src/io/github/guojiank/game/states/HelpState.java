@@ -8,15 +8,14 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 public class HelpState extends State {
     Texture texture;
 
-    public HelpState(StateManagor stateManagor) {
-        super(stateManagor);
+    public HelpState(StateManager stateManager) {
+        super(stateManager);
         this.texture = new Texture("badlogic.jpg");
     }
 
-    @Override
     void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            stateManagor.setState(new GameState(stateManagor));
+            stateManager.setState(new GameState(stateManager));
         }
     }
 
@@ -25,6 +24,7 @@ public class HelpState extends State {
         batch.begin();
         batch.draw(texture, 0, 0);
         batch.end();
+        handleInput();
     }
 
 

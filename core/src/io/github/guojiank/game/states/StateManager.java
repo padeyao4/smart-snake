@@ -2,11 +2,11 @@ package io.github.guojiank.game.states;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class StateManagor {
+public class StateManager {
     State state;
     SpriteBatch batch;
 
-    public StateManagor(SpriteBatch batch) {
+    public StateManager(SpriteBatch batch) {
         this.batch = batch;
     }
 
@@ -14,9 +14,6 @@ public class StateManagor {
         state.render(batch);
     }
 
-    public void update() {
-        state.update();
-    }
 
     public void dispose() {
         state.dispose();

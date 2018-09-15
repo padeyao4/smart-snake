@@ -11,6 +11,10 @@ public class Model {
     public static final int COLS = 20;
     public static final int ROWS = 20;
 
+    public void startOrStop() {
+        running = !running;
+    }
+
     public enum Cell {
         SNAKE, WALL, BLANK, APPLE
     }
@@ -22,6 +26,14 @@ public class Model {
         public Coord(int row, int col) {
             this.row = row;
             this.col = col;
+        }
+
+        public int getX() {
+            return getCol();
+        }
+
+        public int getY() {
+            return getRow();
         }
 
         public int getRow() {
@@ -53,6 +65,11 @@ public class Model {
         public int hashCode() {
             return Objects.hash(row, col);
         }
+
+        @Override
+        public String toString() {
+            return String.format("(%d,%d)", row, col);
+        }
     }
 
     private ArrayList<Coord> snakes; // 蛇的坐标，第一个元素为蛇尾
@@ -61,17 +78,33 @@ public class Model {
 
     private boolean running = false;
 
+    public boolean isRunning() {
+        return running;
+    }
+
+    public List<Coord> getSnake() {
+        return snakes;
+    }
+
+    public ArrayList<Coord> getWalls() {
+        return walls;
+    }
+
+    public Coord getApple() {
+        return apple;
+    }
+
     public Model() {
         snakes = new ArrayList<>(COLS * ROWS + 1);
         walls = new ArrayList<>(2 * COLS + 2 * ROWS);
         init();
     }
 
-    private void init() {
+    public void init() {
         snakes.clear();
-        snakes.add(new Coord(ROWS / 2 - 1, COLS / 2));
+        snakes.add(new Coord(ROWS / 2 + 1, COLS / 2));
         snakes.add(new Coord(ROWS / 2, COLS / 2));
-        snakes.add(new Coord(ROWS / 2, COLS / 2 + 1));
+        snakes.add(new Coord(ROWS / 2 - 1, COLS / 2));
 
         for (int row = 0; row < ROWS; row++) {
             walls.add(new Coord(row, 0));
@@ -85,6 +118,10 @@ public class Model {
         apple = getRandomApple();
     }
 
+    /***
+     * 返回蛇和墙组成的二维数组。
+     * @return
+     */
     public Cell[][] getWorld() {
         Cell[][] world = new Cell[ROWS][COLS];
         for (int row = 0; row < ROWS; row++) {
@@ -129,12 +166,16 @@ public class Model {
         Cell v = world[nextStep.row][nextStep.col];
 
         if (v == SNAKE || v == WALL) {
+
             running = false;
-        }
-        if (v == APPLE) {
+
+        } else if (nextStep.equals(apple)) {
+
             eatApple(nextStep);
-        }
-        if (v == BLANK) {
+            apple = getRandomApple();
+
+        } else if (v == BLANK) {
+
             move(nextStep);
         }
 

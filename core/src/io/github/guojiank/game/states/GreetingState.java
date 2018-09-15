@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class GreetingState extends State {
     Texture texture;
@@ -13,18 +12,17 @@ public class GreetingState extends State {
     Sprite sprite;
 
 
-    public GreetingState(StateManagor stateManagor) {
-        super(stateManagor);
+    public GreetingState(StateManager stateManager) {
+        super(stateManager);
         texture = new Texture("me.png");
         sprite = new Sprite(texture);
-        sprite.setSize(150f,150f);
-        sprite.setPosition(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2);
+        sprite.setSize(150f, 150f);
+        sprite.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
     }
 
-    @Override
     void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
-            stateManagor.setState(new HelpState(stateManagor));
+            stateManager.setState(new HelpState(stateManager));
 
     }
 
@@ -33,6 +31,7 @@ public class GreetingState extends State {
         batch.begin();
         sprite.draw(batch);
         batch.end();
+        handleInput();
     }
 
     @Override
