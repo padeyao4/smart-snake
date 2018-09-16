@@ -140,4 +140,28 @@ public class Algorithm {
         return paths.size() == 0 ? null : paths.get(paths.size() - 1);
     }
 
+
+    /**
+     * 找到一条可以将 3个点串联起来的 路径。
+     * <p>
+     * 每运动一次model会跟着变化
+     *
+     * @param src   第一个点
+     * @param mid   中间点
+     * @param dst   最后一个点
+     * @param model
+     * @return 返回 一条路径 从 src出发 穿过 mid 在 dst结束
+     */
+    public static LinkedList<Coord> findSeriesPath(Coord src, Coord mid, Coord dst, Model model) {
+        LinkedList<Coord> srcToMidPath = findShortestPath(src, mid, model.getWorld(), null);
+        if (srcToMidPath == null) return null;
+        Model shadowModel = getShadowModelByPath(model, srcToMidPath);
+        LinkedList<Coord> midToDstPath = findShortestPath(mid, dst, shadowModel.getWorld(), null);
+        if (midToDstPath == null) return null;
+        srcToMidPath.removeLast();
+        srcToMidPath.addAll(midToDstPath);
+        return srcToMidPath;
+    }
+
+
 }

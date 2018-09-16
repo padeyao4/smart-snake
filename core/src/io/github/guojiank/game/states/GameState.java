@@ -77,14 +77,15 @@ public class GameState extends State {
             Gdx.graphics.setTitle("debug-平行世界");
         }
 
-        if (status == 1) {
-            if (Gdx.input.isKeyJustPressed(Q)) {
-                algo = 1;
-                Gdx.graphics.setTitle("SmartSnake-最短路径搜索");
-            } else if (Gdx.input.isKeyJustPressed(W)) {
-                algo = 2;
-                Gdx.graphics.setTitle("SmartSnake-最长路径搜索");
-            }
+        if (Gdx.input.isKeyJustPressed(Q)) {
+            algo = 1;
+            Gdx.graphics.setTitle("SmartSnake-最短路径搜索");
+        } else if (Gdx.input.isKeyJustPressed(W)) {
+            algo = 2;
+            Gdx.graphics.setTitle("SmartSnake-最长路径搜索");
+        } else if (Gdx.input.isKeyJustPressed(E)) {
+            algo = 3;
+            Gdx.graphics.setTitle("SmartSnake-串联路径");
         }
 
 
@@ -134,6 +135,8 @@ public class GameState extends State {
                 case 2:
                     path = findFarthestPath(model.getSnakeHead(), model.getApple(), model.getWorld());
                     break;
+                case 3:
+                    path = findSeriesPath(model.getSnakeHead(), model.getApple(), model.getSnakeTail(), model);
             }
 
             if (path != null) {
@@ -221,7 +224,7 @@ public class GameState extends State {
 
     private void drawSnake(Model model) {
         List<Coord> snake = model.getSnake();
-        pixmap.setColor(Color.GRAY);
+        pixmap.setColor(Color.BLUE);
         for (int i = 0; i < snake.size() - 1; i++) {
             Coord a = snake.get(i);
             Coord b = snake.get(i + 1);

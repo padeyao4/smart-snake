@@ -211,7 +211,7 @@ public class Model implements Cloneable {
         return snakes.get(snakes.size() - 2);
     }
 
-    private Coord getSnakeTail() {
+    public Coord getSnakeTail() {
         return snakes.get(0);
     }
 
