@@ -15,6 +15,14 @@ public class Model implements Cloneable {
         running = !running;
     }
 
+    public void start() {
+        running = true;
+    }
+
+    public void stop() {
+        running = false;
+    }
+
     public enum Cell {
         SNAKE, WALL, BLANK, APPLE
     }
@@ -120,6 +128,7 @@ public class Model implements Cloneable {
         }
 
         apple = getRandomApple();
+        bestPath = null;
     }
 
     /***

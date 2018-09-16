@@ -1,6 +1,7 @@
 package io.github.guojiank.game.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -25,18 +26,27 @@ public class GameState extends State {
     Model model;
     int status = 1; // 指定显示画面的样子
     int algo = 1; // 指定搜索算法
+    Music bg;
+    boolean music = true;
 
     public GameState(StateManager stateManager) {
         super(stateManager);
+        bg = Gdx.audio.newMusic(Gdx.files.internal("WhereIstheLove.mp3"));
+        bg.setLooping(true);
+        bg.play();
         r = new Random();
         pixmap = new Pixmap(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Pixmap.Format.RGB888);
         pixmap.setColor(Color.GREEN);
         texture = new Texture(pixmap);
         model = new Model();
         model.init();
+        model.start();
     }
 
 
+    /**
+     * 键盘监听，设置快捷方式
+     */
     void handInput() {
         if (Gdx.input.isKeyJustPressed(UP))
             model.moveUp();
@@ -46,11 +56,17 @@ public class GameState extends State {
             model.moveLeft();
         else if (Gdx.input.isKeyJustPressed(RIGHT))
             model.moveRight();
-        else if (Gdx.input.isKeyJustPressed(ENTER))
+        else if (Gdx.input.isKeyJustPressed(ENTER)) {
             model.startOrStop();
-        else if (Gdx.input.isKeyJustPressed(F1))
+        } else if (Gdx.input.isKeyJustPressed(F1))
             model.init();
-        else if (Gdx.input.isKeyJustPressed(NUM_1)) {
+        else if (Gdx.input.isKeyJustPressed(F2)) {
+            if (music = !music) {
+                bg.play();
+            } else {
+                bg.pause();
+            }
+        } else if (Gdx.input.isKeyJustPressed(NUM_1)) {
             status = 1;
             Gdx.graphics.setTitle("SmartSnake");
         } else if (Gdx.input.isKeyJustPressed(NUM_2)) {
@@ -61,12 +77,12 @@ public class GameState extends State {
             Gdx.graphics.setTitle("debug-平行世界");
         }
 
-        if(status==1){
-            if(Gdx.input.isKeyJustPressed(Q)){
-                algo=1;
+        if (status == 1) {
+            if (Gdx.input.isKeyJustPressed(Q)) {
+                algo = 1;
                 Gdx.graphics.setTitle("SmartSnake-最短路径搜索");
-            }else if(Gdx.input.isKeyJustPressed(W)){
-                algo=2;
+            } else if (Gdx.input.isKeyJustPressed(W)) {
+                algo = 2;
                 Gdx.graphics.setTitle("SmartSnake-最长路径搜索");
             }
         }
