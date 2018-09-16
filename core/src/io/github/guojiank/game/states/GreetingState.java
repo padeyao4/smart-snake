@@ -9,19 +9,18 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 public class GreetingState extends State {
     Texture texture;
 
-    Sprite sprite;
 
 
     public GreetingState(StateManager stateManager) {
         super(stateManager);
-        texture = new Texture("me.png");
-        sprite = new Sprite(texture);
-        sprite.setSize(150f, 150f);
-        sprite.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+        texture = new Texture("splash2.jpg");
     }
 
     void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) ||
+                Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+                        Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             stateManager.setState(new HelpState(stateManager));
 
     }
@@ -29,7 +28,7 @@ public class GreetingState extends State {
     @Override
     void render(Batch batch) {
         batch.begin();
-        sprite.draw(batch);
+        batch.draw(texture,0,0);
         batch.end();
         handleInput();
     }

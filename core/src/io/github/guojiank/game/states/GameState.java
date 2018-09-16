@@ -180,7 +180,7 @@ public class GameState extends State {
     private void drawPath(Model model) {
         List<Coord> path = model.getBestPath();
         if (path == null) return;
-        pixmap.setColor(Color.GREEN);
+        pixmap.setColor(Color.YELLOW);
         for (int i = 0; i < path.size() - 1; i++) {
             Coord a = path.get(i);
             Coord b = path.get(i + 1);
@@ -218,25 +218,26 @@ public class GameState extends State {
 
     private void drawApple(Model model) {
         Coord a = model.getApple();
-        pixmap.setColor(Color.RED);
-        pixmap.drawRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
+        pixmap.setColor(Color.GREEN);
+        pixmap.fillRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
     }
 
     private void drawWall(Model model) {
         List<Coord> walls = model.getWalls();
-        pixmap.setColor(Color.WHITE);
+        pixmap.setColor(Color.ORANGE);
         for (int i = 0; i < walls.size(); i++) {
             Coord a = walls.get(i);
-            pixmap.drawRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
+            pixmap.fillRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
         }
     }
 
     private void drawSnake(Model model) {
         List<Coord> snake = model.getSnake();
-        pixmap.setColor(Color.BLUE);
+        pixmap.setColor(Color.WHITE);
         for (int i = 0; i < snake.size() - 1; i++) {
             Coord a = snake.get(i);
             Coord b = snake.get(i + 1);
+
             pixmap.drawLine(a.getX() * offset_x + offset_x / 2, a.getY() * offset_y + offset_y / 2, b.getX() * offset_x + offset_x / 2, b.getY() * offset_y + offset_y / 2);
         }
     }

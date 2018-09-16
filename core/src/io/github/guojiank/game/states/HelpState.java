@@ -10,11 +10,13 @@ public class HelpState extends State {
 
     public HelpState(StateManager stateManager) {
         super(stateManager);
-        this.texture = new Texture("badlogic.jpg");
+        this.texture = new Texture("help.jpg");
     }
 
     void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) ||
+                Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+                Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             stateManager.setState(new GameState(stateManager));
         }
     }

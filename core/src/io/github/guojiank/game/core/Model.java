@@ -8,8 +8,8 @@ import java.util.Random;
 import static io.github.guojiank.game.core.Model.Cell.*;
 
 public class Model implements Cloneable {
-    public static final int COLS = 20;
-    public static final int ROWS = 20;
+    public static final int COLS = 50;
+    public static final int ROWS = 50;
 
     public void startOrStop() {
         running = !running;
