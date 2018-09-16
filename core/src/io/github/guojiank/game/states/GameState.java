@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import io.github.guojiank.game.core.Algorithm;
 import io.github.guojiank.game.core.Model;
 import io.github.guojiank.game.core.Model.Coord;
 
@@ -14,8 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import static io.github.guojiank.game.core.Algorithm.*;
 import static com.badlogic.gdx.Input.Keys.*;
+import static io.github.guojiank.game.core.Algorithm.*;
 
 public class GameState extends State {
     int offset_y = Gdx.graphics.getHeight() / Model.ROWS;
@@ -24,8 +23,8 @@ public class GameState extends State {
     Texture texture;
     Random r;
     Model model;
-    boolean debug = false;
-    boolean shadow = false; // 平行世界
+    int status = 1; // 指定显示画面的样子
+    int algo = 1; // 指定搜索算法
 
     public GameState(StateManager stateManager) {
         super(stateManager);
@@ -49,16 +48,27 @@ public class GameState extends State {
             model.moveRight();
         else if (Gdx.input.isKeyJustPressed(ENTER))
             model.startOrStop();
-        else if (Gdx.input.isKeyJustPressed(NUM_1)) {
-            debug = !debug;
-            if (debug) Gdx.graphics.setTitle("debug-最好路径");
-            else Gdx.graphics.setTitle("smart-snake");
-        } else if (Gdx.input.isKeyJustPressed(F1))
+        else if (Gdx.input.isKeyJustPressed(F1))
             model.init();
-        else if (Gdx.input.isKeyJustPressed(NUM_2)) {
-            shadow = !shadow;
-            if (shadow) Gdx.graphics.setTitle("debug-平行世界");
-            else Gdx.graphics.setTitle("debug-最好路径");
+        else if (Gdx.input.isKeyJustPressed(NUM_1)) {
+            status = 1;
+            Gdx.graphics.setTitle("SmartSnake");
+        } else if (Gdx.input.isKeyJustPressed(NUM_2)) {
+            status = 2;
+            Gdx.graphics.setTitle("debug-最好路径");
+        } else if (Gdx.input.isKeyJustPressed(NUM_3)) {
+            status = 3;
+            Gdx.graphics.setTitle("debug-平行世界");
+        }
+
+        if(status==1){
+            if(Gdx.input.isKeyJustPressed(Q)){
+                algo=1;
+                Gdx.graphics.setTitle("SmartSnake-最短路径搜索");
+            }else if(Gdx.input.isKeyJustPressed(W)){
+                algo=2;
+                Gdx.graphics.setTitle("SmartSnake-最长路径搜索");
+            }
         }
 
 
@@ -66,10 +76,19 @@ public class GameState extends State {
 
     @Override
     void render(Batch batch) {
-        if (debug)
-            debugDraw();
-        else
-            draw();
+
+        switch (status) {
+            case 1:
+                draw();
+                break;
+            case 2:
+                debugDraw1();
+                break;
+            case 3:
+                debugDraw2();
+                break;
+        }
+
         batch.begin();
         batch.draw(texture, 0, 0);
         batch.end();
@@ -90,22 +109,39 @@ public class GameState extends State {
         if (tmpTime > 1) {
             tmpTime--;
             model.update();
-            List<Coord> path = findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), new HashSet<Coord>());
+
+            List<Coord> path = null;
+            switch (algo) {
+                case 1: // 最短路径
+                    path = findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), new HashSet<Coord>());
+                    break;
+                case 2:
+                    path = findFarthestPath(model.getSnakeHead(), model.getApple(), model.getWorld());
+                    break;
+            }
+
             if (path != null) {
                 model.setBestPath(path);
             }
         }
     }
 
+    private void debugDraw2() {
+        pixmap.setColor(Color.BLACK);
+        pixmap.fill();
+        Model m = getShadowModelByPath(model, (LinkedList<Coord>) model.getBestPath());
+        drawWord(m);
+        drawApple(m);
+        drawSnake(m);
+        drawPath(m);
+        texture.draw(pixmap, 0, 0);
+    }
 
-    private void debugDraw() {
+
+    private void debugDraw1() {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
         Model m = model;
-        if (shadow){
-            m = getShadowModelByPath(model, (LinkedList<Coord>) model.getBestPath());
-//            System.out.println(m.equals(model));
-        }
         drawWord(m);
         drawApple(m);
         drawSnake(m);

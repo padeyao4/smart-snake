@@ -17,12 +17,12 @@ public class Algorithm {
      * @param src     开始地址
      * @param dst     目标地址
      * @param world
-     * @param exclude 要排查的路径上的点
+     * @param exclude 要排查的路径上的点,如没有要排查的点 传入 null
      * @return 返回src 和 dst 路径的列表，包含src和dst。如果没有找到路径返回None。
      * 返回的列表中的第一个元素是src,最后一个元素是dst
      */
-    public static List<Coord> findShortestPath(Coord src, Coord dst, Cell[][] world, Set<Coord> exclude) {
-        List<Coord> paths = new LinkedList<>(); // 返回的最短路径
+    public static LinkedList<Coord> findShortestPath(Coord src, Coord dst, Cell[][] world, Set<Coord> exclude) {
+        LinkedList<Coord> paths = new LinkedList<>(); // 返回的最短路径
         Queue<Coord> q = new LinkedList<>();
         Map<Coord, Coord> m = new HashMap(); // 保存上一步和下一步的先后顺序
         Set<Coord> s = new HashSet(); // 保存访问过的记录
@@ -30,7 +30,8 @@ public class Algorithm {
         q.offer(src);
         m.put(src, null);
         s.add(src);
-        s.addAll(exclude);
+        if (exclude != null)
+            s.addAll(exclude);
 
         paths.add(dst);
 
@@ -76,13 +77,15 @@ public class Algorithm {
      * @return 返回一个平行世界
      */
     public static Model getShadowModelByPath(Model model, LinkedList<Coord> path) {
+
         Model shadowModel = null;
         LinkedList<Coord> shadowPath = null;
 
         try {
             shadowModel = model.clone();
+            if (path == null) return shadowModel;
             shadowPath = new LinkedList<>();
-            for(Coord c:path){
+            for (Coord c : path) {
                 shadowPath.add((Coord) c.clone());
             }
         } catch (CloneNotSupportedException e) {
@@ -101,6 +104,40 @@ public class Algorithm {
         }
 
         return shadowModel;
+    }
+
+
+    /**
+     * 搜索最长路径
+     *
+     * @param src
+     * @param dst
+     * @param world
+     * @return 如果有最长路径返回包含src 和dst的路径，否则返回None
+     */
+    public static LinkedList<Coord> findFarthestPath(Coord src, Coord dst, Cell[][] world) {
+        ArrayList<LinkedList<Coord>> paths = new ArrayList<>(4);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (abs(abs(i) - abs(j)) == 1) {
+                    Coord o = new Coord(src.row + i, src.col + j);
+                    Cell v = world[o.row][o.col];
+                    if (v != WALL && v != SNAKE) {
+                        LinkedList<Coord> path = findShortestPath(o, dst, world, null);
+                        if (path != null) {
+                            path.add(0, src);
+                            paths.add(path);
+                        }
+                    }
+
+                }
+            }
+        }
+
+        // 由小到大排序
+        Collections.sort(paths, Comparator.comparingInt(LinkedList::size));
+        return paths.size() == 0 ? null : paths.get(paths.size() - 1);
     }
 
 }
