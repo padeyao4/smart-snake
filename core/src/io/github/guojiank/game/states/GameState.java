@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import io.github.guojiank.game.core.Model;
 import io.github.guojiank.game.core.Model.Coord;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
