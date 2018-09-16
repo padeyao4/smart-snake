@@ -134,7 +134,6 @@ public class Algorithm {
                 }
             }
         }
-
         // 由小到大排序
         Collections.sort(paths, Comparator.comparingInt(LinkedList::size));
         return paths.size() == 0 ? null : paths.get(paths.size() - 1);
@@ -161,6 +160,21 @@ public class Algorithm {
         srcToMidPath.removeLast();
         srcToMidPath.addAll(midToDstPath);
         return srcToMidPath;
+    }
+
+    /**
+     * 找当前最好的路径
+     *
+     * @param head
+     * @param apple
+     * @param tail
+     * @param model
+     * @return
+     */
+    public static LinkedList<Coord> findBestPath(Coord head, Coord apple, Coord tail, Model model) {
+        LinkedList<Coord> seriesPath = findSeriesPath(head, apple, tail, model);
+        if (seriesPath != null) return seriesPath;
+        else return findFarthestPath(head, tail, model.getWorld());
     }
 
 

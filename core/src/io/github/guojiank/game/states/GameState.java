@@ -25,7 +25,7 @@ public class GameState extends State {
     Random r;
     Model model;
     int status = 1; // 指定显示画面的样子
-    int algo = 1; // 指定搜索算法
+    int algo = 4; // 指定搜索算法
     Music bg;
     boolean music = true;
 
@@ -86,6 +86,9 @@ public class GameState extends State {
         } else if (Gdx.input.isKeyJustPressed(E)) {
             algo = 3;
             Gdx.graphics.setTitle("SmartSnake-串联路径");
+        } else if (Gdx.input.isKeyJustPressed(R)) {
+            algo = 4;
+            Gdx.graphics.setTitle("SmartSnake-自动选择路径");
         }
 
 
@@ -116,6 +119,8 @@ public class GameState extends State {
 
     float tmpTime = 0;
 
+    float dtTime = 0; //间隔时间
+
     /**
      * 游戏逻辑更新
      *
@@ -123,20 +128,24 @@ public class GameState extends State {
      */
     void update(float deltaTime) {
         tmpTime += deltaTime;
-        if (tmpTime > 1) {
-            tmpTime--;
+        if (tmpTime > dtTime) {
+            tmpTime -= dtTime;
             model.update();
 
             List<Coord> path = null;
             switch (algo) {
                 case 1: // 最短路径
-                    path = findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), new HashSet<Coord>());
+                    path = findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), null);
                     break;
                 case 2:
                     path = findFarthestPath(model.getSnakeHead(), model.getApple(), model.getWorld());
                     break;
                 case 3:
                     path = findSeriesPath(model.getSnakeHead(), model.getApple(), model.getSnakeTail(), model);
+                    break;
+                case 4:
+                    path = findBestPath(model.getSnakeHead(), model.getApple(), model.getSnakeTail(), model);
+                    break;
             }
 
             if (path != null) {
