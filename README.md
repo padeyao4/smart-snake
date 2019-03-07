@@ -29,4 +29,4 @@ java -jar desktop-1.0.jar
 
 打开 idea ,选择 import project , 找到本项目，然后选择 import project from external model 选择 gradle 。
 
-main方法所在目录为 desktop/src/io.github.guojiank.game.desktop/DesktopLauncher 。 启动项目前需要先编辑 Run/Debug configurations 文件。将 working directory 目录修改为 C:\Users\Administrator\Desktop\workspaces\smart-snake\core\assets ,如果是Linux 或者mac 修改为相应目录就可以了
+main方法所在目录为 desktop/src/io.github.guojiank.game.desktop/DesktopLauncher 。 启动项目前需要先编辑 Run/Debug configurations 文件。将 working directory 目录修改为资源目录 (我的电脑的资源目录为C:\Users\Administrator\Desktop\workspaces\smart-snake\core\assets) ,然后能启动了
