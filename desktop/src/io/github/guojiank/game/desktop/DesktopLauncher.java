@@ -3,10 +3,7 @@ package io.github.guojiank.game.desktop;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.math.Interpolation;
 import io.github.guojiank.game.SmartSnake;
-
-import javax.sound.midi.Soundbank;
 
 public class DesktopLauncher {
     public static void main(String[] arg) {
@@ -18,7 +15,7 @@ public class DesktopLauncher {
         new LwjglApplication(new SmartSnake(), config);
     }
 
-    public static String getPNGPath() {
+    private static String getPNGPath() {
         String os = System.getProperty("os.name").toLowerCase();
         String path = "snake.png";
         if (os.contains("window") || os.contains("linux")) {
