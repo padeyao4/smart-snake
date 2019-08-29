@@ -17,7 +17,7 @@ allprojects {
 
     ext {
         appName = "smart-snake"
-        gdxVersion = '1.9.8'
+        gdxVersion = '1.9.10'
     }
 
     repositories {

@@ -70,10 +70,10 @@ public class GameState extends State {
             Gdx.graphics.setTitle("SmartSnake");
         } else if (Gdx.input.isKeyJustPressed(NUM_2)) {
             status = 2;
-            Gdx.graphics.setTitle("debug-最好路径");
+            Gdx.graphics.setTitle("debug-1");
         } else if (Gdx.input.isKeyJustPressed(NUM_3)) {
             status = 3;
-            Gdx.graphics.setTitle("debug-平行世界");
+            Gdx.graphics.setTitle("debug-2");
         }
 
         if (Gdx.input.isKeyJustPressed(Q)) {

@@ -17,13 +17,7 @@ public class DesktopLauncher {
 
     private static String getPNGPath() {
         String os = System.getProperty("os.name").toLowerCase();
-        String path = "snake.png";
-        if (os.contains("window") || os.contains("linux")) {
-            path = "snake_32.png";
-        } else if (os.contains("mac"))
-            path = "snake_128.png";
-        return path;
+        return (os.contains("window") || os.contains("linux")) ? "snake_32.png" : "snake_128.png";
     }
-
 
 }
