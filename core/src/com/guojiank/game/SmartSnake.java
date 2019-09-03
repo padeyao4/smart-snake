@@ -4,31 +4,38 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.guojiank.game.states.GreetingState;
-import com.guojiank.game.states.StateManager;
+import com.guojiank.game.screen.GreetingScreen;
+import lombok.Getter;
 
 public class SmartSnake extends Game {
 
-    SpriteBatch batch;
-    StateManager stateManager;
+    @Getter
+    static SmartSnake instance;
 
-    @Override
-    public void create() {
-        batch = new SpriteBatch();
-        stateManager = new StateManager(batch);
-        stateManager.setState(new GreetingState(stateManager));
+    @Getter
+    SpriteBatch batch;
+
+    public SmartSnake() {
+        instance = this;
     }
 
     @Override
     public void render() {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stateManager.render();
+        super.render();
     }
 
     @Override
+    public void create() {
+        batch = new SpriteBatch();
+        setScreen(new GreetingScreen());
+    }
+
+
+    @Override
     public void dispose() {
+        super.dispose();
         batch.dispose();
-        stateManager.dispose();
     }
 }

@@ -1,22 +1,24 @@
-package com.guojiank.game.states;
+package com.guojiank.game.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.guojiank.game.SmartSnake;
 import com.guojiank.game.core.Model;
-import com.guojiank.game.core.Model.Coord;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import static com.badlogic.gdx.Input.Keys.*;
+import static com.badlogic.gdx.Input.Keys.R;
 import static com.guojiank.game.core.Algorithm.*;
 
-public class GameState extends State {
+public class GameScreen implements Screen {
     int offset_y = Gdx.graphics.getHeight() / Model.ROWS;
     int offset_x = Gdx.graphics.getWidth() / Model.COLS;
     Pixmap pixmap;
@@ -28,8 +30,11 @@ public class GameState extends State {
     Music bg;
     boolean music = true;
 
-    public GameState(StateManager stateManager) {
-        super(stateManager);
+    SpriteBatch batch;
+
+    @Override
+    public void show() {
+        batch = SmartSnake.getInstance().getBatch();
         bg = Gdx.audio.newMusic(Gdx.files.internal("WhereIstheLove.mp3"));
         bg.setLooping(true);
         bg.play();
@@ -89,13 +94,11 @@ public class GameState extends State {
             algo = 4;
             Gdx.graphics.setTitle("SmartSnake-自动选择路径");
         }
-
-
     }
 
-    @Override
-    void render(Batch batch) {
 
+    @Override
+    public void render(float delta) {
         switch (status) {
             case 1:
                 draw();
@@ -115,7 +118,6 @@ public class GameState extends State {
         handInput();
     }
 
-
     float tmpTime = 0;
 
     float dtTime = 0; //间隔时间
@@ -123,7 +125,6 @@ public class GameState extends State {
     /**
      * 游戏逻辑更新
      *
-     * @param deltaTime
      */
     void update(float deltaTime) {
         tmpTime += deltaTime;
@@ -131,7 +132,7 @@ public class GameState extends State {
             tmpTime -= dtTime;
             model.update();
 
-            List<Coord> path = null;
+            List<Model.Coord> path = null;
             switch (algo) {
                 case 1: // 最短路径
                     path = findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), null);
@@ -156,7 +157,7 @@ public class GameState extends State {
     private void debugDraw2() {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
-        Model m = getShadowModelByPath(model, (LinkedList<Coord>) model.getBestPath());
+        Model m = getShadowModelByPath(model, (LinkedList<Model.Coord>) model.getBestPath());
         drawWord(m);
         drawApple(m);
         drawSnake(m);
@@ -177,12 +178,12 @@ public class GameState extends State {
     }
 
     private void drawPath(Model model) {
-        List<Coord> path = model.getBestPath();
+        List<Model.Coord> path = model.getBestPath();
         if (path == null) return;
         pixmap.setColor(Color.YELLOW);
         for (int i = 0; i < path.size() - 1; i++) {
-            Coord a = path.get(i);
-            Coord b = path.get(i + 1);
+            Model.Coord a = path.get(i);
+            Model.Coord b = path.get(i + 1);
             pixmap.drawLine(a.getX() * offset_x + offset_x / 2, a.getY() * offset_y + offset_y / 2, b.getX() * offset_x + offset_x / 2, b.getY() * offset_y + offset_y / 2);
         }
     }
@@ -216,29 +217,48 @@ public class GameState extends State {
     }
 
     private void drawApple(Model model) {
-        Coord a = model.getApple();
+        Model.Coord a = model.getApple();
         pixmap.setColor(Color.GREEN);
         pixmap.fillRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
     }
 
     private void drawWall(Model model) {
-        List<Coord> walls = model.getWalls();
+        List<Model.Coord> walls = model.getWalls();
         pixmap.setColor(Color.ORANGE);
-        for (int i = 0; i < walls.size(); i++) {
-            Coord a = walls.get(i);
+        for (Model.Coord a : walls) {
             pixmap.fillRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
         }
     }
 
     private void drawSnake(Model model) {
-        List<Coord> snake = model.getSnake();
+        List<Model.Coord> snake = model.getSnake();
         pixmap.setColor(Color.WHITE);
         for (int i = 0; i < snake.size() - 1; i++) {
-            Coord a = snake.get(i);
-            Coord b = snake.get(i + 1);
-
+            Model.Coord a = snake.get(i);
+            Model.Coord b = snake.get(i + 1);
             pixmap.drawLine(a.getX() * offset_x + offset_x / 2, a.getY() * offset_y + offset_y / 2, b.getX() * offset_x + offset_x / 2, b.getY() * offset_y + offset_y / 2);
         }
+    }
+
+
+    @Override
+    public void resize(int width, int height) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+        dispose();
     }
 
     @Override
