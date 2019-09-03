@@ -1,11 +1,11 @@
-package io.github.guojiank.game;
+package com.guojiank.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import io.github.guojiank.game.states.GreetingState;
-import io.github.guojiank.game.states.StateManager;
+import com.guojiank.game.states.GreetingState;
+import com.guojiank.game.states.StateManager;
 
 public class SmartSnake extends Game {
 

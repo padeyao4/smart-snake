@@ -1,4 +1,4 @@
-package io.github.guojiank.game.states;
+package com.guojiank.game.states;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 

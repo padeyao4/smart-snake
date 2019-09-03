@@ -1,12 +1,12 @@
-package io.github.guojiank.game.core;
+package com.guojiank.game.core;
 
-import io.github.guojiank.game.core.Model.Cell;
-import io.github.guojiank.game.core.Model.Coord;
+import com.guojiank.game.core.Model.Cell;
+import com.guojiank.game.core.Model.Coord;
 
 import java.util.*;
 
-import static io.github.guojiank.game.core.Model.Cell.SNAKE;
-import static io.github.guojiank.game.core.Model.Cell.WALL;
+import static com.guojiank.game.core.Model.Cell.SNAKE;
+import static com.guojiank.game.core.Model.Cell.WALL;
 import static java.lang.Math.abs;
 
 public class Algorithm {
