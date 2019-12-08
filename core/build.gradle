@@ -1,7 +1,7 @@
 apply plugin: "java"
 
 sourceCompatibility = 1.8
-targetCompatibility = 12
+targetCompatibility = 11
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 sourceSets.main.java.srcDirs = [ "src/" ]
