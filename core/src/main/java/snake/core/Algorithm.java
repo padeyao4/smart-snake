@@ -1,13 +1,14 @@
-package com.guojiank.game.core;
+package snake.core;
 
-import com.guojiank.game.core.Model.Cell;
-import com.guojiank.game.core.Model.Coord;
+
+import snake.core.Model.*;
 
 import java.util.*;
 
-import static com.guojiank.game.core.Model.Cell.SNAKE;
-import static com.guojiank.game.core.Model.Cell.WALL;
+
 import static java.lang.Math.abs;
+import static snake.core.Model.Cell.SNAKE;
+import static snake.core.Model.Cell.WALL;
 
 public class Algorithm {
 

@@ -1,4 +1,4 @@
-package com.guojiank.game.screen;
+package snake.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -7,16 +7,15 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.guojiank.game.SmartSnake;
-import com.guojiank.game.core.Model;
+import snake.SmartSnake;
+import snake.core.Model;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import static com.badlogic.gdx.Input.Keys.*;
-import static com.badlogic.gdx.Input.Keys.R;
-import static com.guojiank.game.core.Algorithm.*;
+import static snake.core.Algorithm.*;
 
 public class GameScreen implements Screen {
     int offset_y = Gdx.graphics.getHeight() / Model.ROWS;

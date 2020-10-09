@@ -1,11 +1,10 @@
-package com.guojiank.game.screen;
+package snake.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.guojiank.game.SmartSnake;
+import snake.SmartSnake;
 
 import static com.badlogic.gdx.Input.Keys.*;
 

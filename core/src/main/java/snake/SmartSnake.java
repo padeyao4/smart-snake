@@ -1,23 +1,26 @@
-package com.guojiank.game;
+package snake;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.guojiank.game.screen.GreetingScreen;
-import lombok.Getter;
+import snake.screen.GreetingScreen;
+
 
 public class SmartSnake extends Game {
 
-    @Getter
     static SmartSnake instance;
 
-    @Getter
     SpriteBatch batch;
 
     public SmartSnake() {
         instance = this;
     }
+
+    public static SmartSnake getInstance() {
+        return instance;
+    }
+
 
     @Override
     public void render() {
@@ -37,5 +40,9 @@ public class SmartSnake extends Game {
     public void dispose() {
         super.dispose();
         batch.dispose();
+    }
+
+    public SpriteBatch getBatch() {
+        return batch;
     }
 }

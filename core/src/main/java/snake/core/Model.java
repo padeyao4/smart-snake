@@ -1,11 +1,12 @@
-package com.guojiank.game.core;
+package snake.core;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.guojiank.game.core.Model.Cell.*;
+import static snake.core.Model.Cell.*;
+
 
 public class Model implements Cloneable {
     public static final int COLS = 50;
