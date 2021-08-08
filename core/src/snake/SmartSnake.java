@@ -7,10 +7,7 @@ import snake.screen.GreetingScreen;
 
 
 public class SmartSnake extends Game {
-
     public SpriteBatch batch;
-
-
 
     @Override
     public void render() {
