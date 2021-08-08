@@ -8,20 +8,13 @@ import snake.SmartSnake;
 /** Launches the desktop (LWJGL3) application. */
 public class DesktopLauncher {
 	public static void main(String[] args) {
-		createApplication();
-	}
-
-	private static LwjglApplication createApplication() {
-		return new LwjglApplication(new SmartSnake(), getDefaultConfiguration());
-	}
-
-	private static LwjglApplicationConfiguration getDefaultConfiguration() {
-		LwjglApplicationConfiguration configuration = new LwjglApplicationConfiguration();
+		var configuration = new LwjglApplicationConfiguration();
 		configuration.height=500;
 		configuration.width=500;
 		configuration.title="smart-snake";
 		configuration.addIcon("snake_128.png", Files.FileType.Classpath);
 		configuration.resizable=false;
-		return configuration;
+		configuration.forceExit=true;
+		new LwjglApplication(new SmartSnake(), configuration);
 	}
 }

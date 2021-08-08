@@ -29,11 +29,16 @@ public class GameScreen implements Screen {
     Music bg;
     boolean music = true;
 
+    SmartSnake smartSnake;
     SpriteBatch batch;
+
+    public GameScreen(SmartSnake smartSnake) {
+        this.smartSnake = smartSnake;
+        batch = smartSnake.batch;
+    }
 
     @Override
     public void show() {
-        batch = SmartSnake.getInstance().getBatch();
         bg = Gdx.audio.newMusic(Gdx.files.internal("WhereIstheLove.mp3"));
         bg.setLooping(true);
         bg.play();
@@ -123,7 +128,6 @@ public class GameScreen implements Screen {
 
     /**
      * 游戏逻辑更新
-     *
      */
     void update(float deltaTime) {
         tmpTime += deltaTime;

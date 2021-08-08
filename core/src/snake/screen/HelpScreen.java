@@ -11,18 +11,23 @@ import static com.badlogic.gdx.Input.Keys.*;
 public class HelpScreen implements Screen {
     private Texture texture;
     private SpriteBatch batch;
+    SmartSnake smartSnake;
+
+    public HelpScreen(SmartSnake smartSnake) {
+        batch = smartSnake.batch;
+        this.smartSnake = smartSnake;
+    }
 
     @Override
     public void show() {
         texture = new Texture("help.jpg");
-        batch = SmartSnake.getInstance().getBatch();
     }
 
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(ENTER) ||
                 Gdx.input.isKeyJustPressed(SPACE) ||
                 Gdx.input.isKeyJustPressed(ESCAPE)) {
-            SmartSnake.getInstance().setScreen(new GameScreen());
+            smartSnake.setScreen(new GameScreen(smartSnake));
         }
     }
 

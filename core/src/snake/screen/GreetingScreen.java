@@ -3,41 +3,45 @@ package snake.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import snake.SmartSnake;
 
 import static com.badlogic.gdx.Input.Keys.*;
 
 public class GreetingScreen implements Screen {
-    private Texture texture;
-    private SpriteBatch batch;
+    Texture texture;
+    SmartSnake smartSnake;
+
+    public GreetingScreen(SmartSnake smartSnake) {
+        this.smartSnake = smartSnake;
+    }
+
     @Override
     public void show() {
         texture = new Texture("splash2.jpg");
-        batch = SmartSnake.getInstance().getBatch();
     }
 
-    private void handleInput(){
+    private void handleInput() {
         if (Gdx.input.isKeyJustPressed(ENTER) ||
                 Gdx.input.isKeyJustPressed(SPACE) ||
-                Gdx.input.isKeyJustPressed(ESCAPE)){
-            SmartSnake.getInstance().setScreen(new HelpScreen());
+                Gdx.input.isKeyJustPressed(ESCAPE)) {
+            smartSnake.setScreen(new HelpScreen(smartSnake));
         }
     }
 
     private static float REMAIN = 5f;
-    private float sum=0;
+    private float sum = 0;
+
     @Override
     public void render(float delta) {
         sum += delta;
         if (sum >= REMAIN) {
-            SmartSnake.getInstance().setScreen(new HelpScreen());
+            smartSnake.setScreen(new HelpScreen(smartSnake));
         }
-        batch.begin();
-        batch.setColor(1, 1, 1, gradientAlpha(sum));
-        batch.draw(texture,0,0);
-        batch.setColor(1, 1, 1, 1);
-        batch.end();
+        smartSnake.batch.begin();
+        smartSnake.batch.setColor(1, 1, 1, gradientAlpha(sum));
+        smartSnake.batch.draw(texture, 0, 0);
+        smartSnake.batch.setColor(1, 1, 1, 1);
+        smartSnake.batch.end();
         handleInput();
     }
 
