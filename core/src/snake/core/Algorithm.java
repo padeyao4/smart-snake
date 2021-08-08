@@ -1,14 +1,10 @@
 package snake.core;
 
 
-import snake.core.Model.*;
-
 import java.util.*;
 
 
 import static java.lang.Math.abs;
-import static snake.core.Model.Cell.SNAKE;
-import static snake.core.Model.Cell.WALL;
 
 public class Algorithm {
 
@@ -22,11 +18,11 @@ public class Algorithm {
      * @return 返回src 和 dst 路径的列表，包含src和dst。如果没有找到路径返回None。
      * 返回的列表中的第一个元素是src,最后一个元素是dst
      */
-    public static LinkedList<Coord> findShortestPath(Coord src, Coord dst, Cell[][] world, Set<Coord> exclude) {
-        LinkedList<Coord> paths = new LinkedList<>(); // 返回的最短路径
-        Queue<Coord> q = new LinkedList<>();
-        Map<Coord, Coord> m = new HashMap(); // 保存上一步和下一步的先后顺序
-        Set<Coord> s = new HashSet(); // 保存访问过的记录
+    public static LinkedList<Model.Coord> findShortestPath(Model.Coord src, Model.Coord dst, Model.Cell[][] world, Set<Model.Coord> exclude) {
+        LinkedList<Model.Coord> paths = new LinkedList<>(); // 返回的最短路径
+        Queue<Model.Coord> q = new LinkedList<>();
+        Map<Model.Coord, Model.Coord> m = new HashMap(); // 保存上一步和下一步的先后顺序
+        Set<Model.Coord> s = new HashSet(); // 保存访问过的记录
 
         q.offer(src);
         m.put(src, null);
@@ -37,10 +33,10 @@ public class Algorithm {
         paths.add(dst);
 
         while (q.size() > 0) {
-            Coord n = q.poll();
+            Model.Coord n = q.poll();
             if ((abs(n.row - dst.row) == 1 && n.col == dst.col) ||
                     (abs(n.col - dst.col) == 1) && n.row == dst.row) {
-                Coord k = n;
+                Model.Coord k = n;
                 while (k != null) {
                     paths.add(k);
                     k = m.get(k);
@@ -51,9 +47,9 @@ public class Algorithm {
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         if (abs(abs(i) - abs(j)) == 1) {
-                            Coord o = new Coord(n.row + i, n.col + j);
-                            Cell value = world[o.row][o.col];
-                            if (value != WALL && value != SNAKE && !s.contains(o)) {
+                            Model.Coord o = new Model.Coord(n.row + i, n.col + j);
+                            Model.Cell value = world[o.row][o.col];
+                            if (value != Model.Cell.WALL && value != Model.Cell.SNAKE && !s.contains(o)) {
                                 s.add(o);
                                 q.offer(o);
                                 m.put(o, n);
@@ -77,17 +73,17 @@ public class Algorithm {
      * @param path  路径必须包含蛇头(head)到目标点，目标点可以是 snake ,apple,walls ,blank
      * @return 返回一个平行世界
      */
-    public static Model getShadowModelByPath(Model model, LinkedList<Coord> path) {
+    public static Model getShadowModelByPath(Model model, LinkedList<Model.Coord> path) {
 
         Model shadowModel = null;
-        LinkedList<Coord> shadowPath = null;
+        LinkedList<Model.Coord> shadowPath = null;
 
         try {
             shadowModel = model.clone();
             if (path == null) return shadowModel;
             shadowPath = new LinkedList<>();
-            for (Coord c : path) {
-                shadowPath.add((Coord) c.clone());
+            for (Model.Coord c : path) {
+                shadowPath.add((Model.Coord) c.clone());
             }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -96,7 +92,7 @@ public class Algorithm {
 
         shadowPath.remove(0);
 
-        for (Coord p : shadowPath) {
+        for (Model.Coord p : shadowPath) {
             if (p.equals(shadowModel.getApple()))
                 shadowModel.eatApple(p);
             else if (shadowModel.getWalls().contains(p) || shadowModel.getSnake().contains(p)) {
@@ -116,16 +112,16 @@ public class Algorithm {
      * @param world
      * @return 如果有最长路径返回包含src 和dst的路径，否则返回None
      */
-    public static LinkedList<Coord> findFarthestPath(Coord src, Coord dst, Cell[][] world) {
-        ArrayList<LinkedList<Coord>> paths = new ArrayList<>(4);
+    public static LinkedList<Model.Coord> findFarthestPath(Model.Coord src, Model.Coord dst, Model.Cell[][] world) {
+        ArrayList<LinkedList<Model.Coord>> paths = new ArrayList<>(4);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (abs(abs(i) - abs(j)) == 1) {
-                    Coord o = new Coord(src.row + i, src.col + j);
-                    Cell v = world[o.row][o.col];
-                    if (v != WALL && v != SNAKE) {
-                        LinkedList<Coord> path = findShortestPath(o, dst, world, null);
+                    Model.Coord o = new Model.Coord(src.row + i, src.col + j);
+                    Model.Cell v = world[o.row][o.col];
+                    if (v != Model.Cell.WALL && v != Model.Cell.SNAKE) {
+                        LinkedList<Model.Coord> path = findShortestPath(o, dst, world, null);
                         if (path != null) {
                             path.add(0, src);
                             paths.add(path);
@@ -152,11 +148,11 @@ public class Algorithm {
      * @param model
      * @return 返回 一条路径 从 src出发 穿过 mid 在 dst结束
      */
-    public static LinkedList<Coord> findSeriesPath(Coord src, Coord mid, Coord dst, Model model) {
-        LinkedList<Coord> srcToMidPath = findShortestPath(src, mid, model.getWorld(), null);
+    public static LinkedList<Model.Coord> findSeriesPath(Model.Coord src, Model.Coord mid, Model.Coord dst, Model model) {
+        LinkedList<Model.Coord> srcToMidPath = findShortestPath(src, mid, model.getWorld(), null);
         if (srcToMidPath == null) return null;
         Model shadowModel = getShadowModelByPath(model, srcToMidPath);
-        LinkedList<Coord> midToDstPath = findShortestPath(mid, dst, shadowModel.getWorld(), null);
+        LinkedList<Model.Coord> midToDstPath = findShortestPath(mid, dst, shadowModel.getWorld(), null);
         if (midToDstPath == null) return null;
         srcToMidPath.removeLast();
         srcToMidPath.addAll(midToDstPath);
@@ -172,8 +168,8 @@ public class Algorithm {
      * @param model
      * @return
      */
-    public static LinkedList<Coord> findBestPath(Coord head, Coord apple, Coord tail, Model model) {
-        LinkedList<Coord> seriesPath = findSeriesPath(head, apple, tail, model);
+    public static LinkedList<Model.Coord> findBestPath(Model.Coord head, Model.Coord apple, Model.Coord tail, Model model) {
+        LinkedList<Model.Coord> seriesPath = findSeriesPath(head, apple, tail, model);
         if (seriesPath != null) return seriesPath;
         else return findFarthestPath(head, tail, model.getWorld());
     }
