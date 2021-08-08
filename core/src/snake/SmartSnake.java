@@ -3,11 +3,13 @@ package snake;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import lombok.Getter;
 import snake.screen.GreetingScreen;
 
 
+@Getter
 public class SmartSnake extends Game {
-    public SpriteBatch batch;
+    SpriteBatch batch;
 
     @Override
     public void render() {
@@ -28,7 +30,4 @@ public class SmartSnake extends Game {
         batch.dispose();
     }
 
-    public SpriteBatch getBatch() {
-        return batch;
-    }
 }

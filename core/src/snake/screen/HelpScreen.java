@@ -14,7 +14,7 @@ public class HelpScreen implements Screen {
     SmartSnake smartSnake;
 
     public HelpScreen(SmartSnake smartSnake) {
-        batch = smartSnake.batch;
+        batch = smartSnake.getBatch();
         this.smartSnake = smartSnake;
     }
 

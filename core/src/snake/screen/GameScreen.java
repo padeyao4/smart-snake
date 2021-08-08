@@ -1,14 +1,17 @@
 package snake.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import snake.SmartSnake;
-import snake.core.Model;
+import snake.core.Cell;
+import snake.core.Config;
+import snake.core.GameManager;
+import snake.core.Point;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,13 +20,13 @@ import java.util.Random;
 import static com.badlogic.gdx.Input.Keys.*;
 import static snake.core.Algorithm.*;
 
-public class GameScreen implements Screen {
-    int offset_y = Gdx.graphics.getHeight() / Model.ROWS;
-    int offset_x = Gdx.graphics.getWidth() / Model.COLS;
+public class GameScreen extends ScreenAdapter {
+    int offsetY = Gdx.graphics.getHeight() / Config.ROWS;
+    int offsetX = Gdx.graphics.getWidth() / Config.COLS;
     Pixmap pixmap;
     Texture texture;
     Random r;
-    Model model;
+    GameManager gameManager;
     int status = 1; // 指定显示画面的样子
     int algo = 4; // 指定搜索算法
     Music bg;
@@ -34,7 +37,7 @@ public class GameScreen implements Screen {
 
     public GameScreen(SmartSnake smartSnake) {
         this.smartSnake = smartSnake;
-        batch = smartSnake.batch;
+        batch = smartSnake.getBatch();
     }
 
     @Override
@@ -46,9 +49,9 @@ public class GameScreen implements Screen {
         pixmap = new Pixmap(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Pixmap.Format.RGB888);
         pixmap.setColor(Color.GREEN);
         texture = new Texture(pixmap);
-        model = new Model();
-        model.init();
-        model.start();
+        gameManager = new GameManager();
+        gameManager.init();
+        gameManager.start();
     }
 
 
@@ -56,20 +59,24 @@ public class GameScreen implements Screen {
      * 键盘监听，设置快捷方式
      */
     void handInput() {
-        if (Gdx.input.isKeyJustPressed(UP))
-            model.moveUp();
+        if (Gdx.input.isKeyJustPressed(ESCAPE)) {
+            Gdx.app.exit();
+            System.exit(0);
+        } else if (Gdx.input.isKeyJustPressed(UP))
+            gameManager.moveUp();
         else if (Gdx.input.isKeyJustPressed(DOWN))
-            model.moveDown();
+            gameManager.moveDown();
         else if (Gdx.input.isKeyJustPressed(LEFT))
-            model.moveLeft();
+            gameManager.moveLeft();
         else if (Gdx.input.isKeyJustPressed(RIGHT))
-            model.moveRight();
+            gameManager.moveRight();
         else if (Gdx.input.isKeyJustPressed(ENTER)) {
-            model.startOrStop();
+            gameManager.startOrStop();
         } else if (Gdx.input.isKeyJustPressed(F1))
-            model.init();
+            gameManager.init();
         else if (Gdx.input.isKeyJustPressed(F2)) {
-            if (music = !music) {
+            music = !music;
+            if (music) {
                 bg.play();
             } else {
                 bg.pause();
@@ -83,9 +90,7 @@ public class GameScreen implements Screen {
         } else if (Gdx.input.isKeyJustPressed(NUM_3)) {
             status = 3;
             Gdx.graphics.setTitle("debug-2");
-        }
-
-        if (Gdx.input.isKeyJustPressed(Q)) {
+        } else if (Gdx.input.isKeyJustPressed(Q)) {
             algo = 1;
             Gdx.graphics.setTitle("SmartSnake-最短路径搜索");
         } else if (Gdx.input.isKeyJustPressed(W)) {
@@ -104,15 +109,9 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         switch (status) {
-            case 1:
-                draw();
-                break;
-            case 2:
-                debugDraw1();
-                break;
-            case 3:
-                debugDraw2();
-                break;
+            case 1 -> draw();
+            case 2 -> debugDraw1();
+            case 3 -> debugDraw2();
         }
 
         batch.begin();
@@ -133,26 +132,18 @@ public class GameScreen implements Screen {
         tmpTime += deltaTime;
         if (tmpTime > dtTime) {
             tmpTime -= dtTime;
-            model.update();
+            gameManager.update();
 
-            List<Model.Coord> path = null;
-            switch (algo) {
-                case 1: // 最短路径
-                    path = findShortestPath(model.getSnakeHead(), model.getApple(), model.getWorld(), null);
-                    break;
-                case 2:
-                    path = findFarthestPath(model.getSnakeHead(), model.getApple(), model.getWorld());
-                    break;
-                case 3:
-                    path = findSeriesPath(model.getSnakeHead(), model.getApple(), model.getSnakeTail(), model);
-                    break;
-                case 4:
-                    path = findBestPath(model.getSnakeHead(), model.getApple(), model.getSnakeTail(), model);
-                    break;
-            }
+            List<Point> path = switch (algo) {
+                case 1 -> findShortestPath(gameManager.getSnakeHead(), gameManager.getApple(), gameManager.getWorld(), null);
+                case 2 -> findFarthestPath(gameManager.getSnakeHead(), gameManager.getApple(), gameManager.getWorld());
+                case 3 -> findSeriesPath(gameManager.getSnakeHead(), gameManager.getApple(), gameManager.getSnakeTail(), gameManager);
+                case 4 -> findBestPath(gameManager.getSnakeHead(), gameManager.getApple(), gameManager.getSnakeTail(), gameManager);
+                default -> null;
+            };
 
             if (path != null) {
-                model.setBestPath(path);
+                gameManager.setBestPath(path);
             }
         }
     }
@@ -160,7 +151,7 @@ public class GameScreen implements Screen {
     private void debugDraw2() {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
-        Model m = getShadowModelByPath(model, (LinkedList<Model.Coord>) model.getBestPath());
+        GameManager m = getShadowModelByPath(gameManager, (LinkedList<Point>) gameManager.getBestPath());
         drawWord(m);
         drawApple(m);
         drawSnake(m);
@@ -172,7 +163,7 @@ public class GameScreen implements Screen {
     private void debugDraw1() {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
-        Model m = model;
+        GameManager m = gameManager;
         drawWord(m);
         drawApple(m);
         drawSnake(m);
@@ -180,32 +171,36 @@ public class GameScreen implements Screen {
         texture.draw(pixmap, 0, 0);
     }
 
-    private void drawPath(Model model) {
-        List<Model.Coord> path = model.getBestPath();
+    private void drawPath(GameManager gameManager) {
+        List<Point> path = gameManager.getBestPath();
         if (path == null) return;
         pixmap.setColor(Color.YELLOW);
+        draw(path);
+    }
+
+    private void draw(List<Point> path) {
         for (int i = 0; i < path.size() - 1; i++) {
-            Model.Coord a = path.get(i);
-            Model.Coord b = path.get(i + 1);
-            pixmap.drawLine(a.getX() * offset_x + offset_x / 2, a.getY() * offset_y + offset_y / 2, b.getX() * offset_x + offset_x / 2, b.getY() * offset_y + offset_y / 2);
+            Point a = path.get(i);
+            Point b = path.get(i + 1);
+            pixmap.drawLine(a.getX() * offsetX + offsetX / 2, a.getY() * offsetY + offsetY / 2, b.getX() * offsetX + offsetX / 2, b.getY() * offsetY + offsetY / 2);
         }
     }
 
-    private void drawWord(Model model) {
-        Model.Cell[][] world = model.getWorld();
-        for (int row = 0; row < Model.ROWS; row++) {
-            for (int col = 0; col < Model.COLS; col++) {
-                Model.Cell type = world[row][col];
-                if (type == Model.Cell.APPLE)
+    private void drawWord(GameManager gameManager) {
+        Cell[][] world = gameManager.getWorld();
+        for (int row = 0; row < Config.ROWS; row++) {
+            for (int col = 0; col < Config.COLS; col++) {
+                Cell type = world[row][col];
+                if (type == Cell.APPLE)
                     pixmap.setColor(Color.RED);
-                if (type == Model.Cell.SNAKE)
+                if (type == Cell.SNAKE)
                     pixmap.setColor(Color.GRAY);
-                if (type == Model.Cell.WALL)
+                if (type == Cell.WALL)
                     pixmap.setColor(Color.WHITE);
-                if (type == Model.Cell.BLANK)
+                if (type == Cell.BLANK)
                     pixmap.setColor(Color.BLACK);
 
-                pixmap.drawRectangle(col * offset_x, row * offset_y, offset_x, offset_y);
+                pixmap.drawRectangle(col * offsetX, row * offsetY, offsetX, offsetY);
             }
         }
     }
@@ -213,50 +208,30 @@ public class GameScreen implements Screen {
     private void draw() {
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
-        drawSnake(model);
-        drawWall(model);
-        drawApple(model);
+        drawSnake(gameManager);
+        drawWall(gameManager);
+        drawApple(gameManager);
         texture.draw(pixmap, 0, 0);
     }
 
-    private void drawApple(Model model) {
-        Model.Coord a = model.getApple();
+    private void drawApple(GameManager gameManager) {
+        Point a = gameManager.getApple();
         pixmap.setColor(Color.GREEN);
-        pixmap.fillRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
+        pixmap.fillRectangle(a.getX() * offsetX, a.getY() * offsetY, offsetX, offsetY);
     }
 
-    private void drawWall(Model model) {
-        List<Model.Coord> walls = model.getWalls();
+    private void drawWall(GameManager gameManager) {
+        List<Point> walls = gameManager.getWalls();
         pixmap.setColor(Color.ORANGE);
-        for (Model.Coord a : walls) {
-            pixmap.fillRectangle(a.getX() * offset_x, a.getY() * offset_y, offset_x, offset_y);
+        for (Point a : walls) {
+            pixmap.fillRectangle(a.getX() * offsetX, a.getY() * offsetY, offsetX, offsetY);
         }
     }
 
-    private void drawSnake(Model model) {
-        List<Model.Coord> snake = model.getSnake();
+    private void drawSnake(GameManager gameManager) {
+        List<Point> snake = gameManager.getSnakes();
         pixmap.setColor(Color.WHITE);
-        for (int i = 0; i < snake.size() - 1; i++) {
-            Model.Coord a = snake.get(i);
-            Model.Coord b = snake.get(i + 1);
-            pixmap.drawLine(a.getX() * offset_x + offset_x / 2, a.getY() * offset_y + offset_y / 2, b.getX() * offset_x + offset_x / 2, b.getY() * offset_y + offset_y / 2);
-        }
-    }
-
-
-    @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
+        draw(snake);
     }
 
     @Override

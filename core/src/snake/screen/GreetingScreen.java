@@ -3,6 +3,7 @@ package snake.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import snake.SmartSnake;
 
 import static com.badlogic.gdx.Input.Keys.*;
@@ -10,9 +11,11 @@ import static com.badlogic.gdx.Input.Keys.*;
 public class GreetingScreen implements Screen {
     Texture texture;
     SmartSnake smartSnake;
+    SpriteBatch batch;
 
     public GreetingScreen(SmartSnake smartSnake) {
         this.smartSnake = smartSnake;
+        batch = smartSnake.getBatch();
     }
 
     @Override
@@ -28,7 +31,7 @@ public class GreetingScreen implements Screen {
         }
     }
 
-    private static float REMAIN = 5f;
+    private static final float REMAIN = 5f;
     private float sum = 0;
 
     @Override
@@ -37,11 +40,11 @@ public class GreetingScreen implements Screen {
         if (sum >= REMAIN) {
             smartSnake.setScreen(new HelpScreen(smartSnake));
         }
-        smartSnake.batch.begin();
-        smartSnake.batch.setColor(1, 1, 1, gradientAlpha(sum));
-        smartSnake.batch.draw(texture, 0, 0);
-        smartSnake.batch.setColor(1, 1, 1, 1);
-        smartSnake.batch.end();
+        batch.begin();
+        batch.setColor(1, 1, 1, gradientAlpha(sum));
+        batch.draw(texture, 0, 0);
+        batch.setColor(1, 1, 1, 1);
+        batch.end();
         handleInput();
     }
 
