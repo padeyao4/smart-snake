@@ -16,7 +16,7 @@ public class SmartSnake extends Game {
     /**
      * splash画面的显示时间
      */
-    static int SPLASH_MINIMUM_MILLIS = 1;
+    static int SPLASH_MINIMUM_MILLIS = 3;
     Batch batch;
     Skin skin;
 

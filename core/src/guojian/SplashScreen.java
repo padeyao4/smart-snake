@@ -20,7 +20,7 @@ public class SplashScreen extends ScreenAdapter {
     public void render(float delta) {
         ScreenUtils.clear(Color.WHITE);
         batch.begin();
-        batch.draw(splash, 0, 0, splash.getWidth(), splash.getHeight());
+        batch.draw(splash, (Gdx.graphics.getWidth() - splash.getWidth()) / 2f, (Gdx.graphics.getHeight() - splash.getHeight()) / 2f, splash.getWidth(), splash.getHeight());
         batch.end();
     }
 

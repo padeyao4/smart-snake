@@ -15,6 +15,8 @@ public class GameScreen extends ScreenAdapter {
         font = new BitmapFont();
     }
 
+
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.CLEAR);
