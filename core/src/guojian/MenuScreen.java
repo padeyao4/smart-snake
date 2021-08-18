@@ -3,7 +3,6 @@ package guojian;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -44,6 +43,12 @@ public class MenuScreen extends ScreenAdapter {
         return playButton;
     }
 
+    /**
+     * 获取label style
+     *
+     * @param smartSnake
+     * @return
+     */
     private Label.LabelStyle getTitleStyle(SmartSnake smartSnake) {
         var bitmapFont = smartSnake.skin.getFont("font");
         bitmapFont.getData().setScale(1.5f);
