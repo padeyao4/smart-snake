@@ -17,7 +17,7 @@ public class Algorithm {
      * @return 返回src 和 dst 路径的列表，包含src和dst。如果没有找到路径返回None。
      * 返回的列表中的第一个元素是src,最后一个元素是dst
      */
-    public static LinkedList<Point> findShortestPath(Point src, Point dst, Cell[][] world, Set<Point> exclude) {
+    public static LinkedList<Point> findShortestPath(Point src, Point dst, Types[][] world, Set<Point> exclude) {
         LinkedList<Point> paths = new LinkedList<>(); // 返回的最短路径
         Queue<Point> q = new LinkedList<>();
         Map<Point, Point> m = new HashMap<>(); // 保存上一步和下一步的先后顺序
@@ -47,8 +47,8 @@ public class Algorithm {
                     for (int j = -1; j <= 1; j++) {
                         if (abs(abs(i) - abs(j)) == 1) {
                             Point o = new Point(n.row + i, n.col + j);
-                            Cell value = world[o.row][o.col];
-                            if (value != Cell.WALL && value != Cell.SNAKE && !s.contains(o)) {
+                            Types value = world[o.row][o.col];
+                            if (value != Types.WALL && value != Types.SNAKE && !s.contains(o)) {
                                 s.add(o);
                                 q.offer(o);
                                 m.put(o, n);
@@ -100,15 +100,15 @@ public class Algorithm {
      *
      * @return 如果有最长路径返回包含src 和dst的路径，否则返回None
      */
-    public static LinkedList<Point> findFarthestPath(Point src, Point dst, Cell[][] world) {
+    public static LinkedList<Point> findFarthestPath(Point src, Point dst, Types[][] world) {
         var paths = new ArrayList<LinkedList<Point>>(4);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (abs(abs(i) - abs(j)) == 1) {
                     Point o = new Point(src.row + i, src.col + j);
-                    Cell v = world[o.row][o.col];
-                    if (v != Cell.WALL && v != Cell.SNAKE) {
+                    Types v = world[o.row][o.col];
+                    if (v != Types.WALL && v != Types.SNAKE) {
                         LinkedList<Point> path = findShortestPath(o, dst, world, null);
                         if (path != null) {
                             path.add(0, src);

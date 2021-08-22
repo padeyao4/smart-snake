@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static guojian.core.Cell.*;
+import static guojian.core.Types.*;
 import static guojian.core.Config.*;
 
 @Getter
@@ -47,8 +47,8 @@ public class GameManager {
     /***
      * 返回蛇和墙组成的二维数组。
      */
-    public Cell[][] getWorld() {
-        Cell[][] world = new Cell[ROWS][COLS];
+    public Types[][] getWorld() {
+        Types[][] world = new Types[ROWS][COLS];
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
                 world[row][col] = BLANK;
@@ -70,7 +70,7 @@ public class GameManager {
      * @return 随机生成的苹果坐标
      */
     private Point getRandomApple() {
-        Cell[][] world = getWorld();
+        Types[][] world = getWorld();
         ArrayList<Point> blanks = new ArrayList<>(ROWS * COLS + 1);
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
@@ -87,8 +87,8 @@ public class GameManager {
         if (!running) return;
 
         Point nextStep = getNextStep();
-        Cell[][] world = getWorld();
-        Cell v = world[nextStep.row][nextStep.col];
+        Types[][] world = getWorld();
+        Types v = world[nextStep.row][nextStep.col];
 
         if (v == SNAKE || v == WALL) {
 
