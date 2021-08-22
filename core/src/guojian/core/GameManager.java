@@ -10,6 +10,11 @@ import java.util.stream.Collectors;
 import static guojian.core.Types.*;
 import static guojian.core.Config.*;
 
+/**
+ * todo
+ * 重构
+ * - 不要返回world,直接返回walls snake等，通过这些渲染画面
+ */
 @Getter
 public class GameManager {
     List<Point> snakes = new ArrayList<>(COLS * ROWS + 1); // 蛇的坐标，第一个元素为蛇尾
