@@ -1,10 +1,7 @@
 package guojian;
 
 import box2dLight.RayHandler;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
@@ -19,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import guojian.menu.MenuInputProcessor;
 import guojian.menu.Star;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -56,7 +52,7 @@ public class MenuScreen extends ScreenAdapter {
         // 多处理器
         var multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
-        multiplexer.addProcessor(new MenuInputProcessor() {
+        multiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
                 switch (keycode) {
@@ -117,7 +113,7 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     private void playGame() {
-        smartSnake.setScreen(new GameScreen(smartSnake.batch));
+        smartSnake.setScreen(new GameScreen(smartSnake));
     }
 
     private Label.LabelStyle getTitleStyle(SmartSnake smartSnake) {

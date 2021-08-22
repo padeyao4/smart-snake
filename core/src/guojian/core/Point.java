@@ -1,4 +1,4 @@
-package snake.core;
+package guojian.core;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

@@ -1,4 +1,4 @@
-package snake.core;
+package guojian.core;
 
 import lombok.Getter;
 
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static snake.core.Cell.*;
-import static snake.core.Config.*;
+import static guojian.core.Cell.*;
+import static guojian.core.Config.*;
 
 @Getter
 public class GameManager {
