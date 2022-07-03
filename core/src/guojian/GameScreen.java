@@ -61,7 +61,7 @@ public class GameScreen extends ScreenAdapter {
         camera.setToOrtho(false, (SmartSnake.GRID_WIDTH - 2) * SmartSnake.TITLED_SIZE, (SmartSnake.GRID_HEIGHT - 2) * SmartSnake.TITLED_SIZE);
         camera.translate(16, 16);
 
-        bg = Gdx.audio.newMusic(Gdx.files.internal("WhereIstheLove.mp3"));
+        bg = Gdx.audio.newMusic(Gdx.files.internal("WhereIsTheLove.mp3"));
         bg.setLooping(true);
         bg.play();
 
