@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import guojian.core.GameManager;
 import guojian.core.Point;
 
@@ -26,12 +27,13 @@ import static com.badlogic.gdx.Input.Keys.*;
 
 import java.util.List;
 
+import static com.badlogic.gdx.maps.tiled.TiledMapTileLayer.*;
 import static guojian.core.Algorithm.findBestPath;
 
 public class GameScreen extends ScreenAdapter {
-    TiledMapTileLayer.Cell backgroundCell;
-    TiledMapTileLayer.Cell snakeCell;
-    TiledMapTileLayer.Cell foodCell;
+    Cell backgroundCell;
+    Cell snakeCell;
+    Cell foodCell;
 
     Music bg;
 
@@ -65,9 +67,9 @@ public class GameScreen extends ScreenAdapter {
         bg.setLooping(true);
         bg.play();
 
-        backgroundCell = new TiledMapTileLayer.Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/blue.gif"))));
-        snakeCell = new TiledMapTileLayer.Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/indigo.png"))));
-        foodCell = new TiledMapTileLayer.Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/pumpkin.png"))));
+        backgroundCell = new Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/blue.gif"))));
+        snakeCell = new Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/indigo.png"))));
+        foodCell = new Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/pumpkin.png"))));
 
         gameManager = new GameManager();
         gameManager.init();
@@ -101,19 +103,24 @@ public class GameScreen extends ScreenAdapter {
         table.setFillParent(true);
         table.top();
         table.row();
-        scoreLabel = new Label("SCORE " + gameManager.getSnakes().size(), smartSnake.skin);
+        scoreLabel = new VisLabel("SCORE " + gameManager.getSnakes().size());
+
         table.add(scoreLabel).expandX().padTop(20);
-        table.add(new Label("[F1] RESTART", smartSnake.skin)).expandX().padTop(20);
-        table.add(new Label("[F2] PAUSE BGM", smartSnake.skin)).expandX().padTop(20);
-        table.add(new Label("[ENTER / SPACE] PAUSE OR PLAY GAME", smartSnake.skin)).expandX().padTop(20);
-        table.add(new Label("[ESC] EXIT GAME", smartSnake.skin)).expandX().padTop(20);
-        table.add(new Label("[BACK] BACK TO MENU", smartSnake.skin)).expandX().padTop(20);
+        table.add(new VisLabel("[F1] RESTART")).expandX().padTop(20);
+        table.add(new VisLabel("[F2] PAUSE BGM")).expandX().padTop(20);
+        table.add(new VisLabel("[ENTER / SPACE] PAUSE OR PLAY GAME")).expandX().padTop(20);
+        table.add(new VisLabel("[ESC] EXIT GAME")).expandX().padTop(20);
+        table.add(new VisLabel("[BACK] BACK TO MENU")).expandX().padTop(20);
+
         hub.addActor(table);
     }
 
     private void bgPlayOrStop() {
-        if (bg.isPlaying()) bg.pause();
-        else bg.play();
+        if (bg.isPlaying()) {
+            bg.pause();
+        } else {
+            bg.play();
+        }
     }
 
     @Override

@@ -17,6 +17,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class MenuScreen extends ScreenAdapter {
         var table = new Table();
         table.setFillParent(true);
         table.defaults().pad(10); // 设置所有单元格默认内边距为10
-        table.add(new Label("SNAKE GAME", getTitleStyle(smartSnake))).padBottom(50);
+        table.add(new VisLabel("SNAKE GAME")).padBottom(50);
         table.row();
         table.add(getPlayButton());
         table.row();
@@ -80,7 +82,7 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     private TextButton getAutoPlayButton() {
-        var autoPlayButton = new TextButton("[W] atch Greedy Snake Player", smartSnake.skin);
+        var autoPlayButton = new VisTextButton("[W] atch Greedy Snake Player");
         autoPlayButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -91,7 +93,7 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     private TextButton getExitButton() {
-        var exitButton = new TextButton("[ESC] Exit", smartSnake.skin);
+        var exitButton = new VisTextButton("[ESC] Exit");
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -102,7 +104,7 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     private TextButton getPlayButton() {
-        var playButton = new TextButton("[P] lay Snake Game", smartSnake.skin);
+        var playButton = new VisTextButton("[P] lay Snake Game");
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -114,12 +116,6 @@ public class MenuScreen extends ScreenAdapter {
 
     private void playGame() {
         smartSnake.setScreen(new GameScreen(smartSnake));
-    }
-
-    private Label.LabelStyle getTitleStyle(SmartSnake smartSnake) {
-        var bitmapFont = smartSnake.skin.getFont("font");
-        bitmapFont.getData().setScale(1.5f);
-        return new Label.LabelStyle(bitmapFont, Color.WHITE);
     }
 
     @Override
@@ -142,6 +138,7 @@ public class MenuScreen extends ScreenAdapter {
         stage.dispose();
         world.dispose();
         rayHandler.dispose();
+        stars.forEach(Star::dispose);
     }
 
     static class Star {
@@ -185,6 +182,7 @@ public class MenuScreen extends ScreenAdapter {
             position.add(ds);
             pl.setPosition(position);
         }
+
 
         /**
          * 由ray handler 统一释放

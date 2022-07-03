@@ -69,6 +69,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api group: 'org.apache.commons', name: 'commons-lang3', version: '3.11' // apach commons lang3
+        api "com.kotcrab.vis:vis-ui:1.4.11"
         // lombok
         compileOnly 'org.projectlombok:lombok:1.18.20'
         annotationProcessor 'org.projectlombok:lombok:1.18.20'

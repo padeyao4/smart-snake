@@ -4,9 +4,9 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
+import com.kotcrab.vis.ui.VisUI;
 
 public class SmartSnake extends Game {
     public static final int GRID_WIDTH = 80;
@@ -18,12 +18,11 @@ public class SmartSnake extends Game {
      */
     static int SPLASH_MINIMUM_MILLIS = 3;
     Batch batch;
-    Skin skin;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+        VisUI.load();
         setScreen(new SplashScreen(batch));
         new Thread(() -> Gdx.app.postRunnable(this::run)).start();// 设置2秒的定时任务，2秒过后启动启动主菜单界面
     }
@@ -31,6 +30,7 @@ public class SmartSnake extends Game {
     @Override
     public void dispose() {
         batch.dispose();
+        VisUI.dispose();
     }
 
     private void run() {
