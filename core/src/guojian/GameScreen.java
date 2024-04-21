@@ -20,16 +20,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
+import guojian.core.Algorithm;
+import guojian.core.Brain;
 import guojian.core.Snake;
-import guojian.core.Point;
 
 import static com.badlogic.gdx.Input.Keys.*;
-
-import java.util.List;
-
-import static com.badlogic.gdx.maps.tiled.TiledMapTileLayer.*;
+import static com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import static guojian.SmartSnake.*;
-import static guojian.core.Algorithm.findBestPath;
 
 public class GameScreen extends ScreenAdapter {
     Cell backgroundCell;
@@ -48,6 +45,11 @@ public class GameScreen extends ScreenAdapter {
 
     Stage hub;
     SmartSnake smartSnake;
+
+    Brain brain;
+    Label scoreLabel;
+    float tmpTime = 0;
+    float dtTime = 0; //间隔时间
 
     public GameScreen(SmartSnake smartSnake) {
         this.batch = smartSnake.batch;
@@ -75,6 +77,7 @@ public class GameScreen extends ScreenAdapter {
         snake = new Snake();
         snake.init();
         snake.start();
+        brain = new Algorithm();
 
         createHub();
 
@@ -92,8 +95,6 @@ public class GameScreen extends ScreenAdapter {
             }
         });
     }
-
-    Label scoreLabel;
 
     /**
      * 创建hub
@@ -152,19 +153,12 @@ public class GameScreen extends ScreenAdapter {
         tiledMap.dispose();
     }
 
-    float tmpTime = 0;
-    float dtTime = 0; //间隔时间
-
     private void updateGame(float delta) {
         tmpTime += delta;
         if (tmpTime > dtTime) {
             tmpTime -= dtTime;
             snake.update();
-
-            List<Point> path = findBestPath(snake.positions.getLast(), snake.getFood(), snake.getSnakeTail(), snake);
-            if (path != null) {
-                snake.setBestPath(path);
-            }
+            brain.search(snake).ifPresent(points -> snake.setBestPath(points));
         }
     }
 

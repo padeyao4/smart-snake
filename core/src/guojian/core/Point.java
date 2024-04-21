@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class Point {
+public class Point implements Cloneable{
     int row;
     int col;
 
@@ -23,5 +23,14 @@ public class Point {
 
     public Point cp() {
         return new Point(row, col);
+    }
+
+    @Override
+    public Point clone() {
+        try {
+            return (Point) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

@@ -6,19 +6,13 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static guojian.SmartSnake.GRID_HEIGHT;
 import static guojian.SmartSnake.GRID_WIDTH;
 import static guojian.core.CellType.*;
 
-/**
- * todo
- * 重构
- * - 不要返回world,直接返回walls snake等，通过这些渲染画面
- */
 @Getter
-public class Snake {
+public class Snake implements Cloneable {
     public List<Point> positions; // 蛇的坐标，第一个元素为蛇尾
     public List<Point> walls; // 墙的坐标
     public Point food;
@@ -26,14 +20,6 @@ public class Snake {
     @Setter
     private List<Point> bestPath; //算法寻找的最好路径,包含目标头和尾
     private Point step; // 手工输入的下一步
-
-    public void startOrStop() {
-        running = !running;
-    }
-
-    public void start() {
-        running = true;
-    }
 
     public Snake() {
         running = false;
@@ -47,6 +33,14 @@ public class Snake {
             walls.add(new Point(0, col));
             walls.add(new Point(GRID_HEIGHT - 1, col));
         }
+    }
+
+    public void startOrStop() {
+        running = !running;
+    }
+
+    public void start() {
+        running = true;
     }
 
     public void init() {
@@ -133,7 +127,6 @@ public class Snake {
     }
 
     public void moveLeft() {
-
         Point head = positions.getLast();
         step = new Point(head.row, head.col - 1);
     }
@@ -144,13 +137,11 @@ public class Snake {
     }
 
     public void moveUp() {
-
         Point head = positions.getLast();
         step = new Point(head.row - 1, head.col);
     }
 
     public void moveDown() {
-
         Point head = positions.getLast();
         step = new Point(head.row + 1, head.col);
     }
@@ -183,12 +174,17 @@ public class Snake {
         return nextStep;
     }
 
-    protected Snake cp() {
-        var o = new Snake();
-        o.positions = positions.stream().map(Point::cp).collect(Collectors.toList());
-        o.walls = walls.stream().map(Point::cp).collect(Collectors.toList());
-        o.food = food.cp();
-        o.bestPath = null;
-        return o;
+
+    @Override
+    public Snake clone() {
+        try {
+            var o = (Snake) super.clone();
+            o.positions = new ArrayList<>(positions);
+            o.food = food.clone();
+            o.bestPath = null;
+            return o;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
