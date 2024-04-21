@@ -20,7 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
-import guojian.core.GameManager;
+import guojian.core.Snake;
 import guojian.core.Point;
 
 import static com.badlogic.gdx.Input.Keys.*;
@@ -28,6 +28,7 @@ import static com.badlogic.gdx.Input.Keys.*;
 import java.util.List;
 
 import static com.badlogic.gdx.maps.tiled.TiledMapTileLayer.*;
+import static guojian.SmartSnake.*;
 import static guojian.core.Algorithm.findBestPath;
 
 public class GameScreen extends ScreenAdapter {
@@ -39,7 +40,7 @@ public class GameScreen extends ScreenAdapter {
 
     OrthographicCamera camera;
     Batch batch;
-    GameManager gameManager;
+    Snake snake;
 
     TiledMap tiledMap;
     TiledMapTileLayer mapTileLayer;
@@ -56,11 +57,11 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void show() {
         tiledMap = new TiledMap();
-        mapTileLayer = new TiledMapTileLayer(SmartSnake.GRID_WIDTH, SmartSnake.GRID_HEIGHT, SmartSnake.TITLED_SIZE, SmartSnake.TITLED_SIZE);
+        mapTileLayer = new TiledMapTileLayer(GRID_WIDTH, GRID_HEIGHT, TITLED_SIZE, TITLED_SIZE);
         tiledMap.getLayers().add(mapTileLayer);
         renderer = new OrthogonalTiledMapRenderer(tiledMap, batch);
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, (SmartSnake.GRID_WIDTH - 2) * SmartSnake.TITLED_SIZE, (SmartSnake.GRID_HEIGHT - 2) * SmartSnake.TITLED_SIZE);
+        camera.setToOrtho(false, (GRID_WIDTH - 2) * TITLED_SIZE, (GRID_HEIGHT - 2) * TITLED_SIZE);
         camera.translate(16, 16);
 
         bg = Gdx.audio.newMusic(Gdx.files.internal("WhereIsTheLove.mp3"));
@@ -71,9 +72,9 @@ public class GameScreen extends ScreenAdapter {
         snakeCell = new Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/indigo.png"))));
         foodCell = new Cell().setTile(new StaticTiledMapTile(new TextureRegion(new Texture("snake/pumpkin.png"))));
 
-        gameManager = new GameManager();
-        gameManager.init();
-        gameManager.start();
+        snake = new Snake();
+        snake.init();
+        snake.start();
 
         createHub();
 
@@ -81,8 +82,8 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 switch (keycode) {
-                    case SPACE, ENTER -> gameManager.startOrStop(); // 暂停和恢复
-                    case F1 -> gameManager.init(); // 重新开始游戏
+                    case SPACE, ENTER -> snake.startOrStop(); // 暂停和恢复
+                    case F1 -> snake.init(); // 重新开始游戏
                     case F2 -> bgPlayOrStop();
                     case ESCAPE -> Gdx.app.exit(); // 退出
                     case BACKSPACE -> smartSnake.setScreen(new MenuScreen(smartSnake));
@@ -103,7 +104,7 @@ public class GameScreen extends ScreenAdapter {
         table.setFillParent(true);
         table.top();
         table.row();
-        scoreLabel = new VisLabel("SCORE " + gameManager.getSnakes().size());
+        scoreLabel = new VisLabel("SCORE " + snake.getPositions().size());
 
         table.add(scoreLabel).expandX().padTop(20);
         table.add(new VisLabel("[F1] RESTART")).expandX().padTop(20);
@@ -136,7 +137,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void updateHub() {
-        scoreLabel.setText("SCORE: " + gameManager.getSnakes().size());
+        scoreLabel.setText("SCORE: " + snake.getPositions().size());
     }
 
     @Override
@@ -158,19 +159,19 @@ public class GameScreen extends ScreenAdapter {
         tmpTime += delta;
         if (tmpTime > dtTime) {
             tmpTime -= dtTime;
-            gameManager.update();
+            snake.update();
 
-            List<Point> path = findBestPath(gameManager.getSnakeHead(), gameManager.getApple(), gameManager.getSnakeTail(), gameManager);
+            List<Point> path = findBestPath(snake.positions.getLast(), snake.getFood(), snake.getSnakeTail(), snake);
             if (path != null) {
-                gameManager.setBestPath(path);
+                snake.setBestPath(path);
             }
         }
     }
 
     private void updateTiled() {
-        var world = gameManager.getWorld();
-        for (int i = 0; i < SmartSnake.GRID_HEIGHT; i++) {
-            for (int j = 0; j < SmartSnake.GRID_WIDTH; j++) {
+        var world = snake.getCellTypes();
+        for (int i = 0; i < GRID_HEIGHT; i++) {
+            for (int j = 0; j < GRID_WIDTH; j++) {
                 var cell = world[i][j];
                 switch (cell) {
                     case BLANK -> mapTileLayer.setCell(j, i, backgroundCell);
@@ -178,7 +179,7 @@ public class GameScreen extends ScreenAdapter {
                 }
             }
         }
-        var apple = gameManager.getApple();
+        var apple = snake.getFood();
         mapTileLayer.setCell(apple.getX(), apple.getY(), foodCell);
     }
 }

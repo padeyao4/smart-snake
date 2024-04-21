@@ -18,11 +18,11 @@ import static guojian.core.CellType.*;
  * - 不要返回world,直接返回walls snake等，通过这些渲染画面
  */
 @Getter
-public class GameManager {
-    List<Point> snakes = new ArrayList<>(GRID_WIDTH * GRID_HEIGHT + 1); // 蛇的坐标，第一个元素为蛇尾
-    List<Point> walls = new ArrayList<>(2 * GRID_WIDTH + 2 * GRID_HEIGHT); // 墙的坐标
-    Point apple; // 苹果坐标
-    boolean running = false;
+public class Snake {
+    public List<Point> positions; // 蛇的坐标，第一个元素为蛇尾
+    public List<Point> walls; // 墙的坐标
+    public Point food;
+    public boolean running;
     @Setter
     private List<Point> bestPath; //算法寻找的最好路径,包含目标头和尾
     private Point step; // 手工输入的下一步
@@ -35,12 +35,10 @@ public class GameManager {
         running = true;
     }
 
-    public void init() {
-        snakes.clear();
-        snakes.add(new Point(GRID_HEIGHT / 2 + 1, GRID_WIDTH / 2));
-        snakes.add(new Point(GRID_HEIGHT / 2, GRID_WIDTH / 2));
-        snakes.add(new Point(GRID_HEIGHT / 2 - 1, GRID_WIDTH / 2));
-
+    public Snake() {
+        running = false;
+        positions = new ArrayList<>(GRID_WIDTH * GRID_HEIGHT + 1); // 蛇的坐标，第一个元素为蛇尾
+        walls = new ArrayList<>(2 * GRID_WIDTH + 2 * GRID_HEIGHT); // 墙的坐标
         for (int row = 0; row < GRID_HEIGHT; row++) {
             walls.add(new Point(row, 0));
             walls.add(new Point(row, GRID_WIDTH - 1));
@@ -49,22 +47,29 @@ public class GameManager {
             walls.add(new Point(0, col));
             walls.add(new Point(GRID_HEIGHT - 1, col));
         }
+    }
 
-        apple = getRandomApple();
+    public void init() {
+        positions.clear();
+        positions.add(new Point(GRID_HEIGHT / 2 + 1, GRID_WIDTH / 2));
+        positions.add(new Point(GRID_HEIGHT / 2, GRID_WIDTH / 2));
+        positions.add(new Point(GRID_HEIGHT / 2 - 1, GRID_WIDTH / 2));
+
+        food = randomFood();
         bestPath = null;
     }
 
     /***
      * 返回蛇和墙组成的二维数组。
      */
-    public CellType[][] getWorld() {
+    public CellType[][] getCellTypes() {
         CellType[][] world = new CellType[GRID_HEIGHT][GRID_WIDTH];
         for (int row = 0; row < GRID_HEIGHT; row++) {
             for (int col = 0; col < GRID_WIDTH; col++) {
                 world[row][col] = BLANK;
             }
         }
-        for (Point p : snakes) {
+        for (Point p : positions) {
             world[p.row][p.col] = SNAKE;
         }
         for (Point p : walls) {
@@ -79,12 +84,12 @@ public class GameManager {
      *
      * @return 随机生成的苹果坐标
      */
-    private Point getRandomApple() {
-        CellType[][] world = getWorld();
+    private Point randomFood() {
+        CellType[][] cellTypes = getCellTypes();
         ArrayList<Point> blanks = new ArrayList<>(GRID_HEIGHT * GRID_WIDTH + 1);
         for (int row = 0; row < GRID_HEIGHT; row++) {
             for (int col = 0; col < GRID_WIDTH; col++) {
-                if (world[row][col] == BLANK) {
+                if (cellTypes[row][col] == BLANK) {
                     blanks.add(new Point(row, col));
                 }
             }
@@ -97,63 +102,56 @@ public class GameManager {
         if (!running) return;
 
         Point nextStep = getNextStep();
-        CellType[][] world = getWorld();
-        CellType v = world[nextStep.row][nextStep.col];
+        CellType[][] world = getCellTypes();
+        CellType cellType = world[nextStep.row][nextStep.col];
 
-        if (v == SNAKE || v == WALL) {
-
+        if (cellType == SNAKE || cellType == WALL) {
             running = false;
-
-        } else if (nextStep.equals(apple)) {
-
-            eatApple(nextStep);
-            apple = getRandomApple();
-
-        } else if (v == BLANK) {
-
+        } else if (nextStep.equals(food)) {
+            eatFood(nextStep);
+            food = randomFood();
+        } else if (cellType == BLANK) {
             move(nextStep);
         }
-
     }
 
     public void move(Point nextStep) {
-        snakes.add(nextStep);
-        snakes.removeFirst();
+        positions.add(nextStep);
+        positions.removeFirst();
     }
 
-    public void eatApple(Point nextStep) {
-        snakes.add(nextStep);
-    }
-
-    public Point getSnakeHead() {
-        return snakes.getLast();
+    public void eatFood(Point nextStep) {
+        positions.add(nextStep);
     }
 
     public Point getSnakeNeck() {
-        return snakes.get(snakes.size() - 2);
+        return positions.get(positions.size() - 2);
     }
 
     public Point getSnakeTail() {
-        return snakes.getFirst();
+        return positions.getFirst();
     }
 
     public void moveLeft() {
-        Point head = getSnakeHead();
+
+        Point head = positions.getLast();
         step = new Point(head.row, head.col - 1);
     }
 
     public void moveRight() {
-        Point head = getSnakeHead();
+        Point head = positions.getLast();
         step = new Point(head.row, head.col + 1);
     }
 
     public void moveUp() {
-        Point head = getSnakeHead();
+
+        Point head = positions.getLast();
         step = new Point(head.row - 1, head.col);
     }
 
     public void moveDown() {
-        Point head = getSnakeHead();
+
+        Point head = positions.getLast();
         step = new Point(head.row + 1, head.col);
     }
 
@@ -161,7 +159,7 @@ public class GameManager {
      * 什么都不操作时，获取默认下一步
      */
     private Point getDefaultStep() {
-        Point head = getSnakeHead();
+        Point head = positions.getLast();
         Point neck = getSnakeNeck();
         return new Point(2 * head.row - neck.row, 2 * head.col - neck.col);
     }
@@ -185,11 +183,11 @@ public class GameManager {
         return nextStep;
     }
 
-    protected GameManager cp() {
-        var o = new GameManager();
-        o.snakes = snakes.stream().map(Point::cp).collect(Collectors.toList());
+    protected Snake cp() {
+        var o = new Snake();
+        o.positions = positions.stream().map(Point::cp).collect(Collectors.toList());
         o.walls = walls.stream().map(Point::cp).collect(Collectors.toList());
-        o.apple = apple.cp();
+        o.food = food.cp();
         o.bestPath = null;
         return o;
     }

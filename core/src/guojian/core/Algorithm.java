@@ -71,10 +71,10 @@ public class Algorithm {
      * @param path        路径必须包含蛇头(head)到目标点，目标点可以是 snake ,apple,walls ,blank
      * @return 返回一个平行世界
      */
-    public static GameManager getShadowModelByPath(GameManager gameManager, LinkedList<Point> path) {
+    public static Snake getShadowModelByPath(Snake snake, LinkedList<Point> path) {
 
 
-        var shadowGameManager = gameManager.cp();
+        var shadowGameManager = snake.cp();
         if (path == null) return shadowGameManager;
         var shadowPath = new LinkedList<Point>();
         for (Point c : path) {
@@ -84,9 +84,9 @@ public class Algorithm {
         shadowPath.removeFirst();
 
         for (Point p : shadowPath) {
-            if (p.equals(shadowGameManager.getApple()))
-                shadowGameManager.eatApple(p);
-            else if (shadowGameManager.getWalls().contains(p) || shadowGameManager.getSnakes().contains(p)) {
+            if (p.equals(shadowGameManager.getFood()))
+                shadowGameManager.eatFood(p);
+            else if (shadowGameManager.getWalls().contains(p) || shadowGameManager.getPositions().contains(p)) {
                 break;
             } else shadowGameManager.move(p);
         }
@@ -135,11 +135,11 @@ public class Algorithm {
      * @param dst         最后一个点
      * @return 返回 一条路径 从 src出发 穿过 mid 在 dst结束
      */
-    public static LinkedList<Point> findSeriesPath(Point src, Point mid, Point dst, GameManager gameManager) {
-        var srcToMidPath = findShortestPath(src, mid, gameManager.getWorld(), null);
+    public static LinkedList<Point> findSeriesPath(Point src, Point mid, Point dst, Snake snake) {
+        var srcToMidPath = findShortestPath(src, mid, snake.getCellTypes(), null);
         if (srcToMidPath == null) return null;
-        GameManager shadowGameManager = getShadowModelByPath(gameManager, srcToMidPath);
-        var midToDstPath = findShortestPath(mid, dst, shadowGameManager.getWorld(), null);
+        Snake shadowSnake = getShadowModelByPath(snake, srcToMidPath);
+        var midToDstPath = findShortestPath(mid, dst, shadowSnake.getCellTypes(), null);
         if (midToDstPath == null) return null;
         srcToMidPath.removeLast();
         srcToMidPath.addAll(midToDstPath);
@@ -150,9 +150,9 @@ public class Algorithm {
      * 找当前最好的路径
      *
      */
-    public static LinkedList<Point> findBestPath(Point head, Point apple, Point tail, GameManager gameManager) {
-        var seriesPath = findSeriesPath(head, apple, tail, gameManager);
+    public static LinkedList<Point> findBestPath(Point head, Point apple, Point tail, Snake snake) {
+        var seriesPath = findSeriesPath(head, apple, tail, snake);
         if (seriesPath != null) return seriesPath;
-        else return findFarthestPath(head, tail, gameManager.getWorld());
+        else return findFarthestPath(head, tail, snake.getCellTypes());
     }
 }
