@@ -17,7 +17,7 @@ public class Algorithm {
      * @return 返回src 和 dst 路径的列表，包含src和dst。如果没有找到路径返回None。
      * 返回的列表中的第一个元素是src,最后一个元素是dst
      */
-    public static LinkedList<Point> findShortestPath(Point src, Point dst, Types[][] world, Set<Point> exclude) {
+    public static LinkedList<Point> findShortestPath(Point src, Point dst, CellType[][] world, Set<Point> exclude) {
         LinkedList<Point> paths = new LinkedList<>(); // 返回的最短路径
         Queue<Point> q = new LinkedList<>();
         Map<Point, Point> m = new HashMap<>(); // 保存上一步和下一步的先后顺序
@@ -31,7 +31,7 @@ public class Algorithm {
 
         paths.add(dst);
 
-        while (q.size() > 0) {
+        while (!q.isEmpty()) {
             Point n = q.poll();
             if ((abs(n.row - dst.row) == 1 && n.col == dst.col) ||
                     (abs(n.col - dst.col) == 1) && n.row == dst.row) {
@@ -47,8 +47,8 @@ public class Algorithm {
                     for (int j = -1; j <= 1; j++) {
                         if (abs(abs(i) - abs(j)) == 1) {
                             Point o = new Point(n.row + i, n.col + j);
-                            Types value = world[o.row][o.col];
-                            if (value != Types.WALL && value != Types.SNAKE && !s.contains(o)) {
+                            CellType value = world[o.row][o.col];
+                            if (value != CellType.WALL && value != CellType.SNAKE && !s.contains(o)) {
                                 s.add(o);
                                 q.offer(o);
                                 m.put(o, n);
@@ -81,7 +81,7 @@ public class Algorithm {
             shadowPath.add(c.cp());
         }
 
-        shadowPath.remove(0);
+        shadowPath.removeFirst();
 
         for (Point p : shadowPath) {
             if (p.equals(shadowGameManager.getApple()))
@@ -100,18 +100,18 @@ public class Algorithm {
      *
      * @return 如果有最长路径返回包含src 和dst的路径，否则返回None
      */
-    public static LinkedList<Point> findFarthestPath(Point src, Point dst, Types[][] world) {
+    public static LinkedList<Point> findFarthestPath(Point src, Point dst, CellType[][] world) {
         var paths = new ArrayList<LinkedList<Point>>(4);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (abs(abs(i) - abs(j)) == 1) {
                     Point o = new Point(src.row + i, src.col + j);
-                    Types v = world[o.row][o.col];
-                    if (v != Types.WALL && v != Types.SNAKE) {
+                    CellType v = world[o.row][o.col];
+                    if (v != CellType.WALL && v != CellType.SNAKE) {
                         LinkedList<Point> path = findShortestPath(o, dst, world, null);
                         if (path != null) {
-                            path.add(0, src);
+                            path.addFirst(src);
                             paths.add(path);
                         }
                     }
@@ -121,7 +121,7 @@ public class Algorithm {
         }
         // 由小到大排序
         paths.sort(Comparator.comparingInt(LinkedList::size));
-        return paths.size() == 0 ? null : paths.get(paths.size() - 1);
+        return paths.isEmpty() ? null : paths.getLast();
     }
 
 

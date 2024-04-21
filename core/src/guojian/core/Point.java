@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class Point{
+public class Point {
     int row;
     int col;
 
@@ -21,7 +21,7 @@ public class Point{
         return getRow();
     }
 
-    public Point cp(){
-        return new Point(row,col);
+    public Point cp() {
+        return new Point(row, col);
     }
 }

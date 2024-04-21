@@ -1,5 +1,5 @@
 package guojian.core;
 
-public enum Types {
+public enum CellType {
     SNAKE, WALL, BLANK
 }

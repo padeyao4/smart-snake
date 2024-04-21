@@ -1,14 +1,16 @@
 package guojian.core;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static guojian.core.Types.*;
-import static guojian.core.Config.*;
+import static guojian.SmartSnake.GRID_HEIGHT;
+import static guojian.SmartSnake.GRID_WIDTH;
+import static guojian.core.CellType.*;
 
 /**
  * todo
@@ -17,10 +19,13 @@ import static guojian.core.Config.*;
  */
 @Getter
 public class GameManager {
-    List<Point> snakes = new ArrayList<>(COLS * ROWS + 1); // 蛇的坐标，第一个元素为蛇尾
-    List<Point> walls = new ArrayList<>(2 * COLS + 2 * ROWS); // 墙的坐标
+    List<Point> snakes = new ArrayList<>(GRID_WIDTH * GRID_HEIGHT + 1); // 蛇的坐标，第一个元素为蛇尾
+    List<Point> walls = new ArrayList<>(2 * GRID_WIDTH + 2 * GRID_HEIGHT); // 墙的坐标
     Point apple; // 苹果坐标
     boolean running = false;
+    @Setter
+    private List<Point> bestPath; //算法寻找的最好路径,包含目标头和尾
+    private Point step; // 手工输入的下一步
 
     public void startOrStop() {
         running = !running;
@@ -32,17 +37,17 @@ public class GameManager {
 
     public void init() {
         snakes.clear();
-        snakes.add(new Point(ROWS / 2 + 1, COLS / 2));
-        snakes.add(new Point(ROWS / 2, COLS / 2));
-        snakes.add(new Point(ROWS / 2 - 1, COLS / 2));
+        snakes.add(new Point(GRID_HEIGHT / 2 + 1, GRID_WIDTH / 2));
+        snakes.add(new Point(GRID_HEIGHT / 2, GRID_WIDTH / 2));
+        snakes.add(new Point(GRID_HEIGHT / 2 - 1, GRID_WIDTH / 2));
 
-        for (int row = 0; row < ROWS; row++) {
+        for (int row = 0; row < GRID_HEIGHT; row++) {
             walls.add(new Point(row, 0));
-            walls.add(new Point(row, COLS - 1));
+            walls.add(new Point(row, GRID_WIDTH - 1));
         }
-        for (int col = 0; col < COLS; col++) {
+        for (int col = 0; col < GRID_WIDTH; col++) {
             walls.add(new Point(0, col));
-            walls.add(new Point(ROWS - 1, col));
+            walls.add(new Point(GRID_HEIGHT - 1, col));
         }
 
         apple = getRandomApple();
@@ -52,10 +57,10 @@ public class GameManager {
     /***
      * 返回蛇和墙组成的二维数组。
      */
-    public Types[][] getWorld() {
-        Types[][] world = new Types[ROWS][COLS];
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
+    public CellType[][] getWorld() {
+        CellType[][] world = new CellType[GRID_HEIGHT][GRID_WIDTH];
+        for (int row = 0; row < GRID_HEIGHT; row++) {
+            for (int col = 0; col < GRID_WIDTH; col++) {
                 world[row][col] = BLANK;
             }
         }
@@ -75,10 +80,10 @@ public class GameManager {
      * @return 随机生成的苹果坐标
      */
     private Point getRandomApple() {
-        Types[][] world = getWorld();
-        ArrayList<Point> blanks = new ArrayList<>(ROWS * COLS + 1);
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
+        CellType[][] world = getWorld();
+        ArrayList<Point> blanks = new ArrayList<>(GRID_HEIGHT * GRID_WIDTH + 1);
+        for (int row = 0; row < GRID_HEIGHT; row++) {
+            for (int col = 0; col < GRID_WIDTH; col++) {
                 if (world[row][col] == BLANK) {
                     blanks.add(new Point(row, col));
                 }
@@ -92,8 +97,8 @@ public class GameManager {
         if (!running) return;
 
         Point nextStep = getNextStep();
-        Types[][] world = getWorld();
-        Types v = world[nextStep.row][nextStep.col];
+        CellType[][] world = getWorld();
+        CellType v = world[nextStep.row][nextStep.col];
 
         if (v == SNAKE || v == WALL) {
 
@@ -113,7 +118,7 @@ public class GameManager {
 
     public void move(Point nextStep) {
         snakes.add(nextStep);
-        snakes.remove(0);
+        snakes.removeFirst();
     }
 
     public void eatApple(Point nextStep) {
@@ -121,7 +126,7 @@ public class GameManager {
     }
 
     public Point getSnakeHead() {
-        return snakes.get(snakes.size() - 1);
+        return snakes.getLast();
     }
 
     public Point getSnakeNeck() {
@@ -129,19 +134,7 @@ public class GameManager {
     }
 
     public Point getSnakeTail() {
-        return snakes.get(0);
-    }
-
-    private List<Point> bestPath; //算法寻找的最好路径,包含目标头和尾
-
-    private Point step; // 手工输入的下一步
-
-    public List<Point> getBestPath() {
-        return bestPath;
-    }
-
-    public void setBestPath(List<Point> bestPath) {
-        this.bestPath = bestPath;
+        return snakes.getFirst();
     }
 
     public void moveLeft() {

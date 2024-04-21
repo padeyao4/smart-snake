@@ -1,4 +1,4 @@
-sourceCompatibility = 17
+sourceCompatibility = 21
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../assets"]
 
@@ -7,38 +7,40 @@ project.ext.assetsDir = new File("../assets")
 
 import org.gradle.internal.os.OperatingSystem
 
-task run(dependsOn: classes, type: JavaExec) {
-	main = project.mainClassName
-	classpath = sourceSets.main.runtimeClasspath
-	standardInput = System.in
-	workingDir = project.assetsDir
-	ignoreExitValue = true
+tasks.register('run', JavaExec) {
+    dependsOn classes
+    mainClass = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = project.assetsDir
+    ignoreExitValue = true as JavaExecSpec
 
-	if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
-		// Required to run on macOS
-		jvmArgs += "-XstartOnFirstThread"
-	}
+    if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
+        // Required to run on macOS
+        jvmArgs += "-XstartOnFirstThread"
+    }
 }
 
-task debug(dependsOn: classes, type: JavaExec) {
-	main = project.mainClassName
-	classpath = sourceSets.main.runtimeClasspath
-	standardInput = System.in
-	workingDir = project.assetsDir
-	ignoreExitValue = true
-	debug = true
+tasks.register('debug', JavaExec) {
+    dependsOn classes
+    mainClass = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = project.assetsDir
+    ignoreExitValue = true as JavaExecSpec
+    debug = true as JavaExec
 }
 
-task dist(type: Jar) {
-	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-	manifest {
-		attributes 'Main-Class': project.mainClassName
-	}
-	dependsOn configurations.runtimeClasspath
-	from {
-		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-	}
-	with jar
+tasks.register('dist', Jar) {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }
 
 

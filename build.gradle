@@ -1,5 +1,5 @@
 buildscript {
-
+    
 
     repositories {
         mavenLocal()
@@ -9,7 +9,7 @@ buildscript {
         google()
     }
     dependencies {
-
+        
 
     }
 }
@@ -20,8 +20,8 @@ allprojects {
     version = '1.0'
     ext {
         appName = "smart-snake"
-        gdxVersion = '1.11.0'
-        roboVMVersion = '2.3.16'
+        gdxVersion = '1.12.1'
+        roboVMVersion = '2.3.20'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
@@ -71,9 +71,9 @@ project(":core") {
         api group: 'org.apache.commons', name: 'commons-lang3', version: '3.11' // apach commons lang3
         api "com.kotcrab.vis:vis-ui:1.4.11"
         // lombok
-        compileOnly 'org.projectlombok:lombok:1.18.20'
-        annotationProcessor 'org.projectlombok:lombok:1.18.20'
-        testCompileOnly 'org.projectlombok:lombok:1.18.20'
-        testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+        testCompileOnly 'org.projectlombok:lombok:1.18.30'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
     }
 }
