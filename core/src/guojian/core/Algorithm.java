@@ -15,7 +15,7 @@ public class Algorithm implements Brain {
      * @return 返回src 和 dst 路径的列表，包含src和dst。如果没有找到路径返回None。
      * 返回的列表中的第一个元素是src,最后一个元素是dst
      */
-    public  LinkedList<Point> findShortestPath(Point src, Point dst, CellType[][] world) {
+    public LinkedList<Point> findShortestPath(Point src, Point dst, CellType[][] world) {
         LinkedList<Point> paths = new LinkedList<>(); // 返回的最短路径
         Queue<Point> q = new LinkedList<>();
         Map<Point, Point> m = new HashMap<>(); // 保存上一步和下一步的先后顺序
@@ -67,7 +67,7 @@ public class Algorithm implements Brain {
      * @param path 路径必须包含蛇头(head)到目标点，目标点可以是 snake ,apple,walls ,blank
      * @return 返回一个平行世界
      */
-    public  Snake getShadowModelByPath(Snake snake, LinkedList<Point> path) {
+    public Snake getShadowModelByPath(Snake snake, LinkedList<Point> path) {
         var shadowGameManager = snake.clone();
         if (path == null) return shadowGameManager;
         var shadowPath = new LinkedList<Point>();
@@ -94,7 +94,7 @@ public class Algorithm implements Brain {
      *
      * @return 如果有最长路径返回包含src 和dst的路径，否则返回None
      */
-    public  LinkedList<Point> findFarthestPath(Point src, Point dst, CellType[][] world) {
+    public LinkedList<Point> findFarthestPath(Point src, Point dst, CellType[][] world) {
         var paths = new ArrayList<LinkedList<Point>>(4);
 
         for (int i = -1; i <= 1; i++) {
@@ -129,7 +129,7 @@ public class Algorithm implements Brain {
      * @param dst 最后一个点
      * @return 返回 一条路径 从 src出发 穿过 mid 在 dst结束
      */
-    public  LinkedList<Point> findSeriesPath(Point src, Point mid, Point dst, Snake snake) {
+    public LinkedList<Point> findSeriesPath(Point src, Point mid, Point dst, Snake snake) {
         var srcToMidPath = findShortestPath(src, mid, snake.getCellTypes());
         if (srcToMidPath == null) return null;
         Snake shadowSnake = getShadowModelByPath(snake, srcToMidPath);
@@ -143,7 +143,7 @@ public class Algorithm implements Brain {
     /**
      * 找当前最好的路径
      */
-    public  LinkedList<Point> findPath(Point head, Point apple, Point tail, Snake snake) {
+    public LinkedList<Point> findPath(Point head, Point apple, Point tail, Snake snake) {
         var seriesPath = findSeriesPath(head, apple, tail, snake);
         if (seriesPath != null) return seriesPath;
         else return findFarthestPath(head, tail, snake.getCellTypes());

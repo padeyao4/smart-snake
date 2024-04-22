@@ -9,9 +9,10 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.kotcrab.vis.ui.VisUI;
 
 public class SmartSnake extends Game {
-    public static final int GRID_WIDTH = 80;
-    public static final int GRID_HEIGHT = 40;
+    public static final int GRID_WIDTH = 20;
+    public static final int GRID_HEIGHT = 20;
     public static final int TITLED_SIZE = 16;
+    public static final boolean HUB_VISIBLE = false;
 
     /**
      * splash画面的显示时间

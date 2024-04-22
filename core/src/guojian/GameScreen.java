@@ -134,7 +134,9 @@ public class GameScreen extends ScreenAdapter {
         camera.update();
         renderer.setView(camera);
         renderer.render();
-        hub.draw();
+        if (HUB_VISIBLE) {
+            hub.draw();
+        }
     }
 
     private void updateHub() {
