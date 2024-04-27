@@ -150,7 +150,7 @@ public class Algorithm implements Brain {
     }
 
     public Optional<List<Point>> search(Snake snake) {
-        var path = findPath(snake.positions.getLast(), snake.food, snake.positions.getFirst(), snake);
+        var path = findPath(snake.head(), snake.getFood(), snake.tail(), snake);
         return Optional.ofNullable(path);
     }
 }

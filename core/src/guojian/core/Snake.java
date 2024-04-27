@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static guojian.SmartSnake.GRID_HEIGHT;
@@ -15,8 +16,8 @@ import static guojian.core.CellType.*;
 public class Snake implements Cloneable {
     public List<Point> positions; // 蛇的坐标，第一个元素为蛇尾
     public List<Point> walls; // 墙的坐标
-    public Point food;
     public boolean running;
+    private Point food;
     @Setter
     private List<Point> bestPath; //算法寻找的最好路径,包含目标头和尾
     private Point step; // 手工输入的下一步
@@ -33,6 +34,10 @@ public class Snake implements Cloneable {
             walls.add(new Point(0, col));
             walls.add(new Point(GRID_HEIGHT - 1, col));
         }
+    }
+
+    public Optional<Point> food() {
+        return Optional.ofNullable(food);
     }
 
     public void startOrStop() {
@@ -88,8 +93,12 @@ public class Snake implements Cloneable {
                 }
             }
         }
-        int nextIndex = new Random().nextInt(blanks.size());
-        return blanks.get(nextIndex);
+        if (blanks.isEmpty()) {
+            return null;
+        } else {
+            int nextIndex = new Random().nextInt(blanks.size());
+            return blanks.get(nextIndex);
+        }
     }
 
     public void update() {
@@ -110,8 +119,13 @@ public class Snake implements Cloneable {
     }
 
     public void move(Point nextStep) {
-        positions.add(nextStep);
+        positions.addLast(nextStep);
         positions.removeFirst();
+    }
+
+    public void back(Point lastStep){
+        positions.addFirst(lastStep);
+        positions.removeLast();
     }
 
     public void eatFood(Point nextStep) {
@@ -122,8 +136,12 @@ public class Snake implements Cloneable {
         return positions.get(positions.size() - 2);
     }
 
-    public Point getSnakeTail() {
+    public Point tail() {
         return positions.getFirst();
+    }
+
+    public Point head(){
+        return positions.getLast();
     }
 
     public void moveLeft() {

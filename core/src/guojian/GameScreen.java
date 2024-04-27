@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import guojian.core.Algorithm;
 import guojian.core.Brain;
+import guojian.core.BrainImpl;
 import guojian.core.Snake;
 
 import static com.badlogic.gdx.Input.Keys.*;
@@ -77,7 +78,9 @@ public class GameScreen extends ScreenAdapter {
         snake = new Snake();
         snake.init();
         snake.start();
+        // todo
         brain = new Algorithm();
+//        brain = new BrainImpl();
 
         createHub();
 
@@ -175,7 +178,6 @@ public class GameScreen extends ScreenAdapter {
                 }
             }
         }
-        var apple = snake.getFood();
-        mapTileLayer.setCell(apple.getX(), apple.getY(), foodCell);
+        snake.food().ifPresent(food -> mapTileLayer.setCell(food.getX(), food.getY(), foodCell));
     }
 }
